@@ -24,9 +24,7 @@
       </nav>
 
       <div class="header-right">
-        <button class="btn-login hover-lift">
-          Se connecter
-        </button>
+        <NuxtLink to="/connexion" class="btn-login hover-lift">Se connecter</NuxtLink>
       </div>
     </header>
 

@@ -232,6 +232,11 @@
             </div>
           </div>
 
+          <!-- Pense-bêtes -->
+          <div class="section-card glass-card">
+            <StickyNotes :folder-id="folderId" />
+          </div>
+
           <!-- Danger Zone -->
           <div class="section-card danger-card glass-card">
             <div class="section-header">

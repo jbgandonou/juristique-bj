@@ -183,6 +183,25 @@ export const useApi = () => {
   const deleteReminder = (id: string) =>
     apiFetch<void>(`/reminders/${id}`, { method: 'DELETE' });
 
+  // Sticky Notes
+  const getStickyNotes = () =>
+    apiFetch<any[]>('/sticky-notes');
+
+  const getStickyNotesByText = (textId: string) =>
+    apiFetch<any[]>(`/sticky-notes/by-text/${textId}`);
+
+  const getStickyNotesByFolder = (folderId: string) =>
+    apiFetch<any[]>(`/sticky-notes/by-folder/${folderId}`);
+
+  const createStickyNote = (data: { content: string; color?: string; textId?: string; folderId?: string }) =>
+    apiFetch<any>('/sticky-notes', { method: 'POST', body: data });
+
+  const updateStickyNote = (id: string, data: any) =>
+    apiFetch<any>(`/sticky-notes/${id}`, { method: 'PATCH', body: data });
+
+  const deleteStickyNote = (id: string) =>
+    apiFetch<void>(`/sticky-notes/${id}`, { method: 'DELETE' });
+
   return {
     apiFetch,
     getCountries,
@@ -217,6 +236,12 @@ export const useApi = () => {
     createReminder,
     completeReminder,
     deleteReminder,
+    getStickyNotes,
+    getStickyNotesByText,
+    getStickyNotesByFolder,
+    createStickyNote,
+    updateStickyNote,
+    deleteStickyNote,
   };
 };
 

@@ -18,6 +18,7 @@ import { MailModule } from './mail/mail.module';
 import { FoldersModule } from './folders/folders.module';
 import { AnnotationsModule } from './annotations/annotations.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { StickyNotesModule } from './sticky-notes/sticky-notes.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { RemindersModule } from './reminders/reminders.module';
     FoldersModule,
     AnnotationsModule,
     RemindersModule,
+    StickyNotesModule,
   ],
 })
 export class AppModule {}

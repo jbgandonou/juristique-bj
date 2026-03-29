@@ -234,6 +234,11 @@
           </div>
         </div>
 
+        <!-- Pense-bêtes -->
+        <div v-if="isAuthenticated" class="sidebar-card glass-card stagger-4">
+          <StickyNotes :text-id="route.params.id as string" />
+        </div>
+
         <!-- Textes liés -->
         <div class="sidebar-card glass-card stagger-4">
           <div class="sidebar-card-title">

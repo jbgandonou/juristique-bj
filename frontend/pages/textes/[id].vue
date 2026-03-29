@@ -124,6 +124,26 @@
               <p class="comment-body">{{ comment.body }}</p>
             </div>
           </div>
+
+          <!-- Write a comment — requires authentication -->
+          <AuthGate
+            title="Connectez-vous pour commenter"
+            description="Partagez votre analyse juridique avec la communauté des juristes."
+          >
+            <div class="comment-form-wrapper">
+              <h4 class="comment-form-title">Ajouter un commentaire</h4>
+              <textarea
+                v-model="newComment"
+                class="comment-textarea"
+                placeholder="Votre analyse ou commentaire juridique..."
+                rows="4"
+              />
+              <button class="btn-submit-comment hover-lift" :disabled="!newComment.trim()" @click="submitComment">
+                <MessageSquare :size="16" />
+                Publier le commentaire
+              </button>
+            </div>
+          </AuthGate>
         </section>
       </main>
 
@@ -251,6 +271,13 @@ const { getLegalText, getCommentsByText } = useApi();
 const loading = ref(true);
 
 const isFavorited = ref(false);
+const newComment = ref('');
+
+const submitComment = () => {
+  if (!newComment.value.trim()) return;
+  // TODO: wire to API when comment endpoint is available
+  newComment.value = '';
+};
 
 const toggleFavorite = () => {
   isFavorited.value = !isFavorited.value;
@@ -922,5 +949,59 @@ onMounted(async () => {
   .action-btn {
     padding: 8px 12px;
   }
+}
+
+.comment-form-wrapper {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--juris-border);
+}
+
+.comment-form-title {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--juris-text);
+  margin-bottom: 12px;
+}
+
+.comment-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--juris-border);
+  border-radius: 10px;
+  font-size: var(--font-sm);
+  font-family: var(--font-family);
+  color: var(--juris-text);
+  background: var(--juris-surface);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.comment-textarea:focus {
+  border-color: var(--juris-primary-lighter);
+  box-shadow: 0 0 0 3px var(--juris-primary-100);
+}
+
+.btn-submit-comment {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: var(--juris-gradient-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-submit-comment:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

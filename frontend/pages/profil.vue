@@ -387,6 +387,8 @@ import {
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
+definePageMeta({ middleware: 'auth' });
+
 const router = useRouter();
 const { user: authUser, isAuthenticated, authFetch } = useAuth();
 const { getLegalTexts } = useApi();

@@ -75,11 +75,12 @@
 <script setup lang="ts">
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-vue-next';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 definePageMeta({ layout: 'auth' });
 
 const router = useRouter();
+const route = useRoute();
 const { login } = useAuth();
 
 const form = ref({ email: '', password: '', remember: false });
@@ -92,7 +93,8 @@ const handleLogin = async () => {
   errorMessage.value = '';
   try {
     await login(form.value.email, form.value.password);
-    router.push('/profil');
+    const redirect = route.query.redirect as string;
+    router.push(redirect || '/profil');
   } catch (e: any) {
     errorMessage.value = e?.data?.message || e?.message || 'Identifiants incorrects. Veuillez réessayer.';
   } finally {

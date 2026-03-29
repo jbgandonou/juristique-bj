@@ -1,5 +1,11 @@
 <template>
   <div class="tarifs-page">
+    <!-- Upgrade prompt banner -->
+    <div v-if="showUpgradeBanner" class="upgrade-banner fade-in-up">
+      <Crown :size="18" class="upgrade-banner-icon" />
+      <span>Cette fonctionnalité nécessite un abonnement Premium.</span>
+    </div>
+
     <!-- Header -->
     <section class="page-header fade-in-up">
       <h1 class="gradient-text">Nos offres</h1>
@@ -102,7 +108,11 @@
 
 <script setup lang="ts">
 import { Check, Crown, CreditCard, Smartphone, ChevronDown } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const showUpgradeBanner = computed(() => route.query.upgrade === 'true');
 
 const billing = ref<'monthly' | 'yearly'>('monthly');
 
@@ -492,5 +502,24 @@ const faqItems = [
   .pricing-card--premium {
     order: -1;
   }
+}
+
+.upgrade-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  margin-bottom: 8px;
+  background: rgba(var(--juris-secondary-rgb, 212, 160, 23), 0.12);
+  border: 1px solid rgba(var(--juris-secondary-rgb, 212, 160, 23), 0.35);
+  border-radius: 10px;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--juris-text);
+}
+
+.upgrade-banner-icon {
+  color: var(--juris-secondary);
+  flex-shrink: 0;
 }
 </style>

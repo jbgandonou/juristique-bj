@@ -153,7 +153,7 @@ import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import Button from 'primevue/button';
 
-definePageMeta({ layout: 'admin' });
+definePageMeta({ layout: 'admin', middleware: 'admin' });
 
 const filterSource = ref('');
 const filterCountry = ref('');

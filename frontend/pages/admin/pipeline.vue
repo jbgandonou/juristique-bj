@@ -161,7 +161,7 @@ import {
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
-definePageMeta({ layout: 'admin' });
+definePageMeta({ layout: 'admin', middleware: 'admin' });
 
 const sources = ref([
   {

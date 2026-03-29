@@ -102,6 +102,29 @@
         </div>
       </div>
 
+      <!-- Export — Premium feature -->
+      <PremiumGate
+        title="Export des résultats"
+        description="Exportez les résultats de votre recherche en PDF ou Excel avec un abonnement Premium."
+      >
+        <div class="export-bar">
+          <button class="btn-export hover-lift" @click="exportResults('pdf')">
+            <FileSearch :size="16" />
+            Exporter en PDF
+          </button>
+          <button class="btn-export hover-lift" @click="exportResults('excel')">
+            <FileSearch :size="16" />
+            Exporter en Excel
+          </button>
+        </div>
+        <template #preview>
+          <div class="export-bar export-bar--preview">
+            <button class="btn-export" disabled>Exporter en PDF</button>
+            <button class="btn-export" disabled>Exporter en Excel</button>
+          </div>
+        </template>
+      </PremiumGate>
+
       <!-- Empty State -->
       <div v-if="paginatedTexts.length === 0" class="empty-state glass-card">
         <FileSearch :size="48" class="empty-icon" />
@@ -517,6 +540,11 @@ const onFilter = () => {
   fetchFromApi();
 };
 
+const exportResults = (format: 'pdf' | 'excel') => {
+  // TODO: wire to API export endpoint when available
+  console.log(`Export as ${format}`, filteredTexts.value.length, 'results');
+};
+
 const resetFilters = () => {
   searchQuery.value = '';
   selectedPays.value = null;
@@ -770,5 +798,36 @@ const resetFilters = () => {
   .sort-controls {
     flex-wrap: wrap;
   }
+}
+
+.export-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--juris-surface);
+  border: 1px solid var(--juris-border);
+  border-radius: 8px;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  font-family: var(--font-family);
+  color: var(--juris-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-export:hover:not(:disabled) {
+  background: var(--juris-surface-hover);
+}
+
+.btn-export:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

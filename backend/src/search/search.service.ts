@@ -23,7 +23,11 @@ export class SearchService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.ensureCollection();
+    try {
+      await this.ensureCollection();
+    } catch (error) {
+      this.logger.warn(`Typesense not available — search will be disabled: ${error.message || error}`);
+    }
   }
 
   private async ensureCollection() {

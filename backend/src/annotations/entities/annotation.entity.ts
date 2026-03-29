@@ -34,4 +34,17 @@ export class Annotation extends BaseEntity {
 
   @Column({ name: 'folder_id', nullable: true })
   folderId: string;
+
+  // Text selection range (for inline annotations)
+  @Column({ name: 'selection_start', nullable: true })
+  selectionStart: number; // character offset start
+
+  @Column({ name: 'selection_end', nullable: true })
+  selectionEnd: number; // character offset end
+
+  @Column({ name: 'selected_text', type: 'text', nullable: true })
+  selectedText: string; // the exact text that was highlighted
+
+  @Column({ name: 'highlight_color', default: '#FFF3BF' })
+  highlightColor: string; // yellow, green, blue, pink highlight
 }

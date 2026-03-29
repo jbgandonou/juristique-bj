@@ -37,7 +37,7 @@ export class AnnotationsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update annotation' })
-  update(@Param('id') id: string, @Request() req: any, @Body() body: { content?: string; sticker?: string; label?: string }) {
+  update(@Param('id') id: string, @Request() req: any, @Body() body: { content?: string; sticker?: string; label?: string; highlightColor?: string }) {
     return this.service.update(id, req.user.id, body);
   }
 

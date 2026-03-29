@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAnnotationDto {
@@ -34,4 +34,24 @@ export class CreateAnnotationDto {
   @IsOptional()
   @IsString()
   label?: string;
+
+  @ApiPropertyOptional({ example: 150 })
+  @IsOptional()
+  @IsNumber()
+  selectionStart?: number;
+
+  @ApiPropertyOptional({ example: 230 })
+  @IsOptional()
+  @IsNumber()
+  selectionEnd?: number;
+
+  @ApiPropertyOptional({ example: 'Le présent texte régit les activités' })
+  @IsOptional()
+  @IsString()
+  selectedText?: string;
+
+  @ApiPropertyOptional({ example: '#FFF3BF' })
+  @IsOptional()
+  @IsString()
+  highlightColor?: string;
 }

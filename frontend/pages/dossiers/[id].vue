@@ -427,12 +427,16 @@ onMounted(async () => {
   }
   try {
     annotations.value = await authFetch(`/annotations/by-folder/${folderId}`);
-  } catch {
+    console.log('[Dossier] Annotations loaded:', annotations.value.length);
+  } catch (e) {
+    console.error('[Dossier] Failed to load annotations:', e);
     annotations.value = [];
   }
   try {
     editorNotes.value = await authFetch(`/editor-notes/by-folder/${folderId}`);
-  } catch {
+    console.log('[Dossier] Editor notes loaded:', editorNotes.value.length);
+  } catch (e) {
+    console.error('[Dossier] Failed to load editor notes:', e);
     editorNotes.value = [];
   }
   loading.value = false;

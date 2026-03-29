@@ -8,8 +8,6 @@
         <button @click="editor.chain().focus().toggleItalic().run()" :class="{ active: editor.isActive('italic') }" title="Italique (Ctrl+I)"><em>I</em></button>
         <button @click="editor.chain().focus().toggleUnderline().run()" :class="{ active: editor.isActive('underline') }" title="Souligné (Ctrl+U)"><u>U</u></button>
         <button @click="editor.chain().focus().toggleStrike().run()" :class="{ active: editor.isActive('strike') }" title="Barré"><s>S</s></button>
-        <button @click="editor.chain().focus().toggleSubscript().run()" :class="{ active: editor.isActive('subscript') }" title="Indice">X₂</button>
-        <button @click="editor.chain().focus().toggleSuperscript().run()" :class="{ active: editor.isActive('superscript') }" title="Exposant">X²</button>
       </div>
 
       <span class="toolbar-divider"></span>
@@ -67,17 +65,6 @@
 
       <span class="toolbar-divider"></span>
 
-      <!-- Table -->
-      <div class="toolbar-group">
-        <button @click="insertTable" title="Insérer un tableau">⊞ Tableau</button>
-        <template v-if="editor.isActive('table')">
-          <button @click="editor.chain().focus().addColumnAfter().run()" title="Ajouter colonne">+Col</button>
-          <button @click="editor.chain().focus().addRowAfter().run()" title="Ajouter ligne">+Lig</button>
-          <button @click="editor.chain().focus().deleteTable().run()" title="Supprimer tableau" class="btn-danger-sm">✕ Tab</button>
-        </template>
-      </div>
-
-      <span class="toolbar-divider"></span>
 
       <!-- Link -->
       <div class="toolbar-group">
@@ -120,14 +107,7 @@ import TaskItem from '@tiptap/extension-task-item';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
-import TextStyle from '@tiptap/extension-text-style';
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
-import HorizontalRule from '@tiptap/extension-horizontal-rule';
-import Subscript from '@tiptap/extension-subscript';
-import Superscript from '@tiptap/extension-superscript';
+// Table extensions removed — incompatible with Vite ESM build
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
 
 const props = defineProps<{
@@ -173,14 +153,6 @@ const editor = useEditor({
     Link.configure({ openOnClick: false, HTMLAttributes: { class: 'editor-link' } }),
     Underline,
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    TextStyle,
-    Table.configure({ resizable: true }),
-    TableRow,
-    TableCell,
-    TableHeader,
-    HorizontalRule,
-    Subscript,
-    Superscript,
   ],
   onUpdate: ({ editor: ed }) => {
     const json = JSON.stringify(ed.getJSON());
@@ -204,10 +176,6 @@ watch(() => props.modelValue, (newVal) => {
     editor.value.commands.setContent(content, false);
   }
 });
-
-const insertTable = () => {
-  editor.value?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-};
 
 const setLink = () => {
   const url = window.prompt('URL du lien :');

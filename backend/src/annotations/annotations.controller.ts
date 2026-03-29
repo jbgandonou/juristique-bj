@@ -36,9 +36,9 @@ export class AnnotationsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update annotation content' })
-  update(@Param('id') id: string, @Request() req: any, @Body('content') content: string) {
-    return this.service.update(id, req.user.id, content);
+  @ApiOperation({ summary: 'Update annotation' })
+  update(@Param('id') id: string, @Request() req: any, @Body() body: { content?: string; sticker?: string; label?: string }) {
+    return this.service.update(id, req.user.id, body);
   }
 
   @Delete(':id')

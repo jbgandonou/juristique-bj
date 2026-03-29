@@ -17,6 +17,7 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { MailModule } from './mail/mail.module';
 import { FoldersModule } from './folders/folders.module';
 import { AnnotationsModule } from './annotations/annotations.module';
+import { RemindersModule } from './reminders/reminders.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AnnotationsModule } from './annotations/annotations.module';
     BookmarksModule,
     FoldersModule,
     AnnotationsModule,
+    RemindersModule,
   ],
 })
 export class AppModule {}

@@ -19,6 +19,9 @@ export class Folder extends BaseEntity {
   @Column({ name: 'is_shared', default: false })
   isShared: boolean;
 
+  @Column({ nullable: true })
+  label: string; // 'urgent', 'a_relire', 'important', 'en_cours', 'termine'
+
   @ManyToMany(() => LegalText)
   @JoinTable({
     name: 'folder_texts',

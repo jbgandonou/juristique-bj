@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAnnotationDto {
@@ -24,4 +24,14 @@ export class CreateAnnotationDto {
   @IsOptional()
   @IsUUID()
   folderId?: string;
+
+  @ApiPropertyOptional({ example: '📌' })
+  @IsOptional()
+  @IsString()
+  sticker?: string;
+
+  @ApiPropertyOptional({ example: 'urgent', enum: ['urgent', 'a_relire', 'important', 'en_cours', 'termine', 'question'] })
+  @IsOptional()
+  @IsString()
+  label?: string;
 }

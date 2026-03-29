@@ -23,6 +23,12 @@ export class Annotation extends BaseEntity {
   @Column({ nullable: true })
   color: string;
 
+  @Column({ nullable: true })
+  sticker: string; // emoji sticker e.g. '⚠️', '✅', '📌', '🔥', '💡', '❓'
+
+  @Column({ name: 'label', nullable: true })
+  label: string; // 'urgent', 'a_relire', 'important', 'en_cours', 'termine', 'question'
+
   @Column({ name: 'is_private', default: true })
   isPrivate: boolean;
 

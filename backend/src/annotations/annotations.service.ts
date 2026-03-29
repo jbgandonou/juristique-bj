@@ -39,10 +39,12 @@ export class AnnotationsService {
     });
   }
 
-  async update(id: string, userId: string, content: string): Promise<Annotation> {
+  async update(id: string, userId: string, data: { content?: string; sticker?: string; label?: string }): Promise<Annotation> {
     const annotation = await this.repo.findOne({ where: { id, userId } });
     if (!annotation) throw new NotFoundException('Annotation not found');
-    annotation.content = content;
+    if (data.content !== undefined) annotation.content = data.content;
+    if (data.sticker !== undefined) annotation.sticker = data.sticker;
+    if (data.label !== undefined) annotation.label = data.label;
     return this.repo.save(annotation);
   }
 

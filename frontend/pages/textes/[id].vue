@@ -268,6 +268,7 @@ import Divider from 'primevue/divider';
 
 const route = useRoute();
 const { getLegalText, getCommentsByText } = useApi();
+const { setLegalTextSeo } = useSeo();
 const loading = ref(true);
 
 const isFavorited = ref(false);
@@ -446,6 +447,15 @@ onMounted(async () => {
       if (textData.contentText) {
         texte.articles = [{ id: 'content', heading: 'Texte intégral', body: textData.contentText }];
       }
+
+      setLegalTextSeo({
+        title: texte.title,
+        reference: texte.reference,
+        summary: texte.summary,
+        country: texte.country ? { name: texte.country } : undefined,
+        promulgationDate: textData.promulgationDate,
+        themes: texte.themes,
+      });
     }
 
     if (commentsData?.data?.length) {
@@ -464,6 +474,13 @@ onMounted(async () => {
     }
   } catch (e) {
     console.log('API not available, using mock text data');
+    setLegalTextSeo({
+      title: texte.title,
+      reference: texte.reference,
+      summary: texte.summary,
+      country: texte.country ? { name: texte.country } : undefined,
+      themes: texte.themes,
+    });
   } finally {
     loading.value = false;
   }

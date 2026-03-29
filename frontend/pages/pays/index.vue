@@ -96,6 +96,9 @@ const searchQuery = ref('');
 const loading = ref(true);
 const { getCountries } = useApi();
 
+const { setPageSeo } = useSeo();
+setPageSeo('Pays', '26 pays africains francophones — textes juridiques classés par pays');
+
 const mockRegions = [
   {
     name: 'Afrique de l\'Ouest',

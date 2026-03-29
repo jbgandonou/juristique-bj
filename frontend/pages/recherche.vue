@@ -220,6 +220,9 @@ import Paginator from 'primevue/paginator';
 const route = useRoute();
 const { searchTexts, getLegalTexts } = useApi();
 
+const { setPageSeo } = useSeo();
+setPageSeo('Recherche', 'Recherchez parmi 500+ textes juridiques de 26 pays africains francophones');
+
 // Search & Filters
 const searchQuery = ref('');
 const selectedPays = ref(null);

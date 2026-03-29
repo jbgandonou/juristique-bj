@@ -78,6 +78,9 @@ const selectedCategory = ref('tous');
 const loading = ref(true);
 const { getThemes } = useApi();
 
+const { setPageSeo } = useSeo();
+setPageSeo('Thèmes juridiques', '42 domaines du droit africain francophone');
+
 const categories = [
   { label: 'Tous', value: 'tous', count: 42 },
   { label: 'Droit public', value: 'public', count: 10 },

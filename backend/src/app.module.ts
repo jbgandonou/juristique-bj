@@ -7,6 +7,7 @@ import { CountriesModule } from './countries/countries.module';
 import { ThemesModule } from './themes/themes.module';
 import { LegalTextsModule } from './legal-texts/legal-texts.module';
 import { PipelineModule } from './pipeline/pipeline.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PipelineModule } from './pipeline/pipeline.module';
     ThemesModule,
     LegalTextsModule,
     PipelineModule,
+    SeedModule,
   ],
 })
 export class AppModule {}

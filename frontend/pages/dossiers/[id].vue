@@ -88,6 +88,36 @@
             </div>
           </section>
 
+          <!-- Notes Section -->
+          <section class="section-card glass-card">
+            <div class="section-header">
+              <div class="section-title">
+                <FileEdit :size="18" class="section-icon" />
+                <h2>Notes</h2>
+                <span class="count-badge">{{ editorNotes.length }}</span>
+              </div>
+              <button class="btn-add hover-lift" @click="createNewNote">
+                <Plus :size="16" />
+                Nouvelle note
+              </button>
+            </div>
+
+            <div v-if="editorNotes.length" class="notes-list">
+              <NuxtLink v-for="n in editorNotes" :key="n.id" :to="`/notes/${n.id}`" class="note-list-item card-hover">
+                <div class="note-list-icon">📝</div>
+                <div class="note-list-info">
+                  <span class="note-list-title">{{ n.title || 'Note sans titre' }}</span>
+                  <span class="note-list-preview">{{ n.contentText ? n.contentText.substring(0, 80) + '...' : 'Vide' }}</span>
+                  <span class="note-list-date">{{ n.updatedAt ? new Date(n.updatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '' }}</span>
+                </div>
+              </NuxtLink>
+            </div>
+            <div v-else class="empty-section">
+              <FileEdit :size="32" class="empty-icon" />
+              <p>Aucune note. Cliquez "Nouvelle note" pour commencer à rédiger.</p>
+            </div>
+          </section>
+
           <!-- Annotations Section -->
           <section class="section-card glass-card">
             <div class="section-header">
@@ -355,6 +385,7 @@ const folderId = route.params.id as string;
 const loading = ref(true);
 const folder = ref<any>({ name: '', texts: [], shares: [], annotations: [] });
 const annotations = ref<any[]>([]);
+const editorNotes = ref<any[]>([]);
 
 const editingName = ref(false);
 const editName = ref('');
@@ -395,9 +426,14 @@ onMounted(async () => {
     folder.value = { id: folderId, name: 'Dossier', texts: [], shares: [], color: '#1A237E' };
   }
   try {
-    annotations.value = await authFetch(`/annotations?folderId=${folderId}`);
+    annotations.value = await authFetch(`/annotations/by-folder/${folderId}`);
   } catch {
     annotations.value = [];
+  }
+  try {
+    editorNotes.value = await authFetch(`/editor-notes/by-folder/${folderId}`);
+  } catch {
+    editorNotes.value = [];
   }
   loading.value = false;
 });
@@ -426,26 +462,48 @@ const removeText = async (textId: string) => {
   folder.value.texts = folder.value.texts.filter((t: any) => t.id !== textId);
 };
 
+// Cache all published texts for search
+const allAvailableTexts = ref<any[]>([]);
+const textsLoaded = ref(false);
+
+const loadAllTexts = async () => {
+  if (textsLoaded.value) return;
+  textSearchLoading.value = true;
+  try {
+    const config = useRuntimeConfig();
+    const res = await $fetch<any>(`${config.public.apiBaseUrl}/legal-texts`, {
+      params: { limit: '200', status: 'published' },
+    });
+    allAvailableTexts.value = res?.data || [];
+    textsLoaded.value = true;
+  } catch {
+    allAvailableTexts.value = [];
+  } finally {
+    textSearchLoading.value = false;
+  }
+};
+
 const onTextSearch = () => {
   clearTimeout(searchTimeout);
   if (textSearchQuery.value.length < 2) {
     textSearchResults.value = [];
     return;
   }
-  textSearchLoading.value = true;
-  searchTimeout = setTimeout(async () => {
-    try {
-      const config = useRuntimeConfig();
-      const res = await $fetch<any>(`${config.public.apiBaseUrl}/legal-texts?limit=10&status=published`, {
-        params: { q: textSearchQuery.value },
-      });
-      textSearchResults.value = res?.data || [];
-    } catch {
-      textSearchResults.value = [];
-    } finally {
-      textSearchLoading.value = false;
-    }
-  }, 300);
+  // Load texts on first search
+  if (!textsLoaded.value) {
+    loadAllTexts().then(() => filterTexts());
+    return;
+  }
+  filterTexts();
+};
+
+const filterTexts = () => {
+  const q = textSearchQuery.value.toLowerCase();
+  textSearchResults.value = allAvailableTexts.value.filter((t: any) =>
+    (t.title && t.title.toLowerCase().includes(q)) ||
+    (t.reference && t.reference.toLowerCase().includes(q)) ||
+    (t.country?.name && t.country.name.toLowerCase().includes(q))
+  ).slice(0, 10);
 };
 
 const isTextInFolder = (textId: string) => {
@@ -733,4 +791,14 @@ textarea.form-input { resize: vertical; }
 .text-search-add-icon { color: var(--juris-primary); flex-shrink: 0; margin-left: 12px; }
 
 .text-search-empty, .text-search-hint { text-align: center; padding: 24px 16px; font-size: var(--font-sm); color: var(--juris-text-muted); }
+
+/* Notes list */
+.notes-list { display: flex; flex-direction: column; gap: 8px; }
+.note-list-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--juris-surface); border: 1px solid var(--juris-border-light); border-radius: var(--radius-md); text-decoration: none; color: inherit; transition: all 0.2s; }
+.note-list-item:hover { border-color: var(--juris-primary-lighter); box-shadow: var(--shadow-sm); }
+.note-list-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+.note-list-info { flex: 1; min-width: 0; }
+.note-list-title { display: block; font-size: var(--font-sm); font-weight: 600; color: var(--juris-text); margin-bottom: 2px; }
+.note-list-preview { display: block; font-size: var(--font-xs); color: var(--juris-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.note-list-date { font-size: 0.65rem; color: var(--juris-text-muted); }
 </style>

@@ -11,6 +11,9 @@ import { SeedModule } from './seed/seed.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SearchModule } from './search/search.module';
+import { CommentsModule } from './comments/comments.module';
+import { AlertsModule } from './alerts/alerts.module';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
 
 @Module({
   imports: [
@@ -28,6 +31,9 @@ import { SearchModule } from './search/search.module';
     UsersModule,
     AuthModule,
     SearchModule,
+    CommentsModule,
+    AlertsModule,
+    BookmarksModule,
   ],
 })
 export class AppModule {}

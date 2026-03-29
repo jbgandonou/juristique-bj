@@ -247,40 +247,34 @@ onMounted(async () => {
 const fetchFromApi = async () => {
   loading.value = true;
   try {
-    const params: Record<string, string> = { page: '1', limit: '50' };
-    if (searchQuery.value.trim()) params.q = searchQuery.value.trim();
-    if (selectedPays.value) params.country = selectedPays.value;
-    if (selectedTheme.value) params.theme = selectedTheme.value;
+    const params: Record<string, string> = { page: '1', limit: '50', status: 'published' };
+    if (selectedPays.value) params.countryCode = selectedPays.value;
+    if (selectedTheme.value) params.themeSlug = selectedTheme.value;
     if (selectedType.value) params.textType = selectedType.value;
 
-    // Try search endpoint first, fall back to legal-texts
-    let results: any[] = [];
-    try {
-      const searchRes = await searchTexts(params);
-      results = searchRes?.hits || searchRes?.data || [];
-    } catch {
-      const textsRes = await getLegalTexts(params);
-      results = textsRes?.data || [];
-    }
+    // Use legal-texts endpoint directly (works without Typesense)
+    const textsRes = await getLegalTexts(params);
+    const results = textsRes?.data || [];
 
-    if (results.length > 0 || searchQuery.value.trim()) {
+    if (results.length > 0) {
       apiTexts.value = results.map((t: any) => ({
-        id: t.id || t.document?.id,
-        title: t.title || t.document?.title,
-        reference: t.reference || t.document?.reference || '',
-        country: t.country?.name || t.document?.country || '',
+        id: t.id,
+        title: t.title,
+        reference: t.reference || '',
+        country: t.country?.name || '',
+        countryCode: t.country?.code || '',
         flag: '',
-        date: t.promulgationDate || t.document?.promulgationDate
-          ? new Date(t.promulgationDate || t.document?.promulgationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+        date: t.promulgationDate
+          ? new Date(t.promulgationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
           : '',
         dateSort: t.promulgationDate
           ? parseInt(new Date(t.promulgationDate).toISOString().slice(0, 10).replace(/-/g, ''))
           : 0,
-        type: t.textType || t.document?.textType || '',
-        isInForce: t.isInForce ?? t.document?.isInForce ?? true,
-        verified: t.isVerified ?? t.document?.isVerified ?? false,
-        themes: (t.themes || t.document?.themes || []).map((th: any) => th.name || th),
-        summary: t.summary || t.document?.summary || '',
+        type: t.textType || '',
+        isInForce: t.isInForce ?? true,
+        verified: t.isVerified ?? false,
+        themes: (t.themes || []).map((th: any) => th.name || th),
+        summary: t.summary || '',
       }));
       usingApiData.value = true;
     } else {
@@ -486,31 +480,32 @@ const allTexts = [
 const filteredTexts = computed(() => {
   let results = usingApiData.value ? [...apiTexts.value] : [...allTexts];
 
+  // Client-side text search filter (applies to both API and mock data)
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase();
     results = results.filter(t =>
       t.title.toLowerCase().includes(q) ||
       t.reference.toLowerCase().includes(q) ||
       t.country.toLowerCase().includes(q) ||
-      t.themes.some(th => th.toLowerCase().includes(q)) ||
+      t.themes.some((th: string) => th.toLowerCase().includes(q)) ||
       (t.summary && t.summary.toLowerCase().includes(q))
     );
   }
 
-  if (selectedPays.value) {
-    results = results.filter(t => t.country === selectedPays.value);
-  }
-
-  if (selectedTheme.value) {
-    results = results.filter(t => t.themes.includes(selectedTheme.value));
-  }
-
-  if (selectedType.value) {
-    results = results.filter(t => t.type === selectedType.value);
-  }
-
-  if (selectedStatut.value !== null && selectedStatut.value !== undefined) {
-    results = results.filter(t => t.isInForce === selectedStatut.value);
+  // Only apply dropdown filters on mock data (API already filters server-side)
+  if (!usingApiData.value) {
+    if (selectedPays.value) {
+      results = results.filter(t => t.country === selectedPays.value);
+    }
+    if (selectedTheme.value) {
+      results = results.filter(t => t.themes.includes(selectedTheme.value));
+    }
+    if (selectedType.value) {
+      results = results.filter(t => t.type === selectedType.value);
+    }
+    if (selectedStatut.value !== null && selectedStatut.value !== undefined) {
+      results = results.filter(t => t.isInForce === selectedStatut.value);
+    }
   }
 
   // Sort

@@ -101,6 +101,25 @@ export const useApi = () => {
   const getCommentsByText = (textId: string, page = 1, limit = 20) =>
     apiFetch<PaginatedResult<any>>(`/comments/by-text/${textId}?page=${page}&limit=${limit}`);
 
+  // Pipeline jobs
+  const getPipelineJobs = (page = 1, limit = 20) =>
+    apiFetch<PaginatedResult<any>>(`/pipeline/jobs?page=${page}&limit=${limit}`);
+
+  // Pipeline sources
+  const getPipelineSources = () =>
+    apiFetch<any[]>('/pipeline/sources');
+
+  // Legal texts with status filter (for editorial queue)
+  const getLegalTextsByStatus = (status: string, page = 1, limit = 20) =>
+    apiFetch<PaginatedResult<LegalText>>(`/legal-texts?status=${status}&page=${page}&limit=${limit}`);
+
+  // Update legal text status (approve/reject)
+  const updateLegalTextStatus = (id: string, status: string) =>
+    apiFetch<LegalText>(`/legal-texts/${id}`, {
+      method: 'PATCH',
+      body: { status },
+    });
+
   return {
     apiFetch,
     getCountries,
@@ -112,6 +131,10 @@ export const useApi = () => {
     getLegalText,
     searchTexts,
     getCommentsByText,
+    getPipelineJobs,
+    getPipelineSources,
+    getLegalTextsByStatus,
+    updateLegalTextStatus,
   };
 };
 

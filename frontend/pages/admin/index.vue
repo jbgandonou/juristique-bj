@@ -138,6 +138,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import {
   FileText, Clock, Users, Globe,
   TrendingUp, TrendingDown, ChevronRight,
@@ -149,7 +150,11 @@ import Button from 'primevue/button';
 
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
-const stats = [
+const { getLegalTexts, getPipelineJobs, getPipelineSources } = useApi();
+
+const loading = ref(true);
+
+const stats = ref([
   {
     label: 'Textes publiés',
     value: '523',
@@ -186,7 +191,7 @@ const stats = [
     iconBg: 'rgba(198,148,42,0.1)',
     iconColor: 'var(--juris-secondary)',
   },
-];
+]);
 
 const chartBars = [
   { month: 'Sep', pct: 38, highlight: false },
@@ -206,13 +211,43 @@ const quickStats = [
   { label: 'Côte d\'Ivoire', value: '63', pct: 37, color: 'var(--juris-primary-lighter)' },
 ];
 
-const recentActivity = [
+const recentActivity = ref([
   { source: 'FAOLEX', textes: 23, status: 'completed', date: '28 mars 2026' },
   { source: 'OHADA', textes: 8, status: 'completed', date: '27 mars 2026' },
   { source: 'JO Bénin', textes: 5, status: 'failed', date: '27 mars 2026' },
   { source: 'Primature SN', textes: 12, status: 'running', date: '29 mars 2026' },
   { source: 'Assemblée CI', textes: 0, status: 'queued', date: '29 mars 2026' },
-];
+]);
+
+onMounted(async () => {
+  try {
+    const [publishedRes, pendingRes, jobsRes, sourcesRes] = await Promise.all([
+      getLegalTexts({ status: 'published', limit: '1' }),
+      getLegalTexts({ status: 'pending_review', limit: '1' }),
+      getPipelineJobs(1, 5),
+      getPipelineSources(),
+    ]);
+    // Update stats with real data
+    stats.value[0].value = publishedRes.total.toLocaleString();
+    stats.value[1].value = pendingRes.total.toLocaleString();
+    stats.value[3].value = sourcesRes.length.toString();
+    // Update activity table with real jobs
+    if (jobsRes.data?.length) {
+      recentActivity.value = jobsRes.data.map((job: any) => ({
+        source: job.source ?? job.sourceName ?? '—',
+        textes: job.textsCount ?? job.textes ?? 0,
+        status: job.status ?? 'queued',
+        date: job.startedAt
+          ? new Date(job.startedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+          : job.date ?? '—',
+      }));
+    }
+  } catch (e) {
+    console.log('Admin API not available, using mock data');
+  } finally {
+    loading.value = false;
+  }
+});
 
 const statusLabel = (s: string) => ({
   completed: 'Terminé',

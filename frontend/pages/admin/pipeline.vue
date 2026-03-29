@@ -153,7 +153,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import {
   Globe, Clock, CheckCircle, CalendarClock, RefreshCw, Settings,
   Play, Loader, AlertTriangle, CircleCheck, Circle, Zap, Terminal, StopCircle,
@@ -163,7 +163,11 @@ import Column from 'primevue/column';
 
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
-const sources = ref([
+const { getPipelineJobs, getPipelineSources } = useApi();
+
+const loading = ref(true);
+
+const mockSources = [
   {
     name: 'FAOLEX',
     active: true,
@@ -206,9 +210,9 @@ const sources = ref([
     successRate: '83%',
     nextRun: 'Demain 06:00',
   },
-]);
+];
 
-const jobs = ref([
+const mockJobs = [
   {
     id: 1042,
     source: 'FAOLEX',
@@ -263,7 +267,49 @@ const jobs = ref([
     textes: 6,
     progress: 100,
   },
-]);
+];
+
+const sources = ref<any[]>([...mockSources]);
+const jobs = ref<any[]>([...mockJobs]);
+
+onMounted(async () => {
+  try {
+    const [sourcesRes, jobsRes] = await Promise.all([
+      getPipelineSources(),
+      getPipelineJobs(1, 20),
+    ]);
+    if (sourcesRes?.length) {
+      sources.value = sourcesRes.map((s: any) => ({
+        name: s.name ?? s.slug ?? '—',
+        active: s.isActive ?? s.active ?? true,
+        lastRun: s.lastRunAt
+          ? new Date(s.lastRunAt).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+          : s.lastRun ?? '—',
+        successRate: s.successRate != null ? `${s.successRate}%` : '—',
+        nextRun: s.nextRunAt
+          ? new Date(s.nextRunAt).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+          : s.nextRun ?? '—',
+      }));
+    }
+    if (jobsRes.data?.length) {
+      jobs.value = jobsRes.data.map((j: any) => ({
+        id: j.id,
+        source: j.source ?? j.sourceName ?? '—',
+        status: j.status ?? 'queued',
+        started: j.startedAt
+          ? new Date(j.startedAt).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+          : j.started ?? '—',
+        duration: j.durationMs != null ? `${Math.round(j.durationMs / 1000)}s` : j.duration ?? null,
+        textes: j.textsCount ?? j.textes ?? 0,
+        progress: j.progress ?? 0,
+      }));
+    }
+  } catch (e) {
+    console.log('Pipeline API not available, using mock data');
+  } finally {
+    loading.value = false;
+  }
+});
 
 const jobSummary = computed(() => {
   const counts: Record<string, number> = {};

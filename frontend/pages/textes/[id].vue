@@ -242,8 +242,13 @@ import {
   Calendar, Scale, FileText, AlignLeft, ScrollText, MessageSquare,
   ThumbsUp, Info, Tag, Link2, ArrowUpRight, XCircle, Quote,
 } from 'lucide-vue-next';
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import Divider from 'primevue/divider';
+
+const route = useRoute();
+const { getLegalText, getCommentsByText } = useApi();
+const loading = ref(true);
 
 const isFavorited = ref(false);
 
@@ -380,6 +385,61 @@ const texte = reactive({
       },
     ],
   },
+});
+
+onMounted(async () => {
+  const id = String(route.params.id);
+  try {
+    const [textData, commentsData] = await Promise.all([
+      getLegalText(id),
+      getCommentsByText(id, 1, 20),
+    ]);
+
+    if (textData) {
+      texte.id = textData.id;
+      texte.title = textData.title;
+      texte.reference = textData.reference;
+      texte.country = textData.country?.name || texte.country;
+      texte.flag = '';
+      texte.type = textData.textType;
+      texte.isInForce = textData.isInForce;
+      texte.verified = textData.isVerified;
+      texte.hierarchyRank = textData.hierarchyRank;
+      texte.datePromulgation = textData.promulgationDate
+        ? new Date(textData.promulgationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+        : texte.datePromulgation;
+      texte.datePublication = textData.publicationDate
+        ? new Date(textData.publicationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+        : texte.datePublication;
+      texte.source = textData.sourceName || texte.source;
+      texte.summary = textData.summary || '';
+      texte.themes = (textData.themes || []).map(t => ({ name: t.name, slug: t.slug }));
+
+      // Parse articles from contentText if available
+      if (textData.contentText) {
+        texte.articles = [{ id: 'content', heading: 'Texte intégral', body: textData.contentText }];
+      }
+    }
+
+    if (commentsData?.data?.length) {
+      texte.comments = commentsData.data.map((c: any) => ({
+        id: c.id,
+        name: c.user?.fullName || 'Anonyme',
+        initials: (c.user?.fullName || 'AN').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
+        profession: c.user?.profession || '',
+        date: c.createdAt
+          ? new Date(c.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '',
+        body: c.content || c.body || '',
+        upvotes: c.upvoteCount || 0,
+        upvoted: false,
+      }));
+    }
+  } catch (e) {
+    console.log('API not available, using mock text data');
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 

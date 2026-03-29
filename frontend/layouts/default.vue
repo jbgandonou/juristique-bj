@@ -24,7 +24,18 @@
       </nav>
 
       <div class="header-right">
-        <NuxtLink to="/connexion" class="btn-login hover-lift">Se connecter</NuxtLink>
+        <template v-if="isAuthenticated">
+          <NuxtLink to="/profil" class="user-chip hover-lift">
+            <div class="user-avatar-sm">{{ userInitials }}</div>
+            <span class="user-name-sm">{{ user?.fullName?.split(' ')[0] }}</span>
+          </NuxtLink>
+          <button class="btn-logout hover-lift" @click="logout">
+            <LogOut :size="16" />
+          </button>
+        </template>
+        <template v-else>
+          <NuxtLink to="/connexion" class="btn-login hover-lift">Se connecter</NuxtLink>
+        </template>
       </div>
     </header>
 
@@ -44,7 +55,20 @@
 </template>
 
 <script setup lang="ts">
-import { Search, Globe, BookOpen } from 'lucide-vue-next';
+import { Search, Globe, BookOpen, LogOut } from 'lucide-vue-next';
+import { computed } from 'vue';
+
+const { user, isAuthenticated, logout } = useAuth();
+
+const userInitials = computed(() => {
+  if (!user.value?.fullName) return '?';
+  return user.value.fullName
+    .split(' ')
+    .map((n: string) => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+});
 </script>
 
 <style scoped>
@@ -110,6 +134,63 @@ import { Search, Globe, BookOpen } from 'lucide-vue-next';
 .btn-login:hover {
   background: var(--juris-primary);
   color: white;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--juris-border);
+  background: var(--juris-surface);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.user-chip:hover {
+  border-color: var(--juris-primary-lighter);
+  background: var(--juris-primary-50);
+}
+
+.user-avatar-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--juris-gradient-primary);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-name-sm {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--juris-text);
+}
+
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--juris-border);
+  background: transparent;
+  color: var(--juris-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  border-color: var(--juris-danger, #c62828);
+  color: var(--juris-danger, #c62828);
+  background: rgba(198, 40, 40, 0.06);
 }
 
 .app-main {

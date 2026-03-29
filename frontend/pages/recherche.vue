@@ -195,6 +195,7 @@ import Select from 'primevue/select';
 import Paginator from 'primevue/paginator';
 
 const route = useRoute();
+const { searchTexts, getLegalTexts } = useApi();
 
 // Search & Filters
 const searchQuery = ref('');
@@ -205,13 +206,67 @@ const selectedStatut = ref(null);
 const selectedSort = ref('date-desc');
 const paginationFirst = ref(0);
 const perPage = ref(10);
+const loading = ref(false);
+const apiTexts = ref<any[]>([]);
+const usingApiData = ref(false);
 
-// Pre-fill from URL query param
-onMounted(() => {
+// Pre-fill from URL query param and trigger search
+onMounted(async () => {
   if (route.query.q) {
     searchQuery.value = String(route.query.q);
   }
+  await fetchFromApi();
 });
+
+const fetchFromApi = async () => {
+  loading.value = true;
+  try {
+    const params: Record<string, string> = { page: '1', limit: '50' };
+    if (searchQuery.value.trim()) params.q = searchQuery.value.trim();
+    if (selectedPays.value) params.country = selectedPays.value;
+    if (selectedTheme.value) params.theme = selectedTheme.value;
+    if (selectedType.value) params.textType = selectedType.value;
+
+    // Try search endpoint first, fall back to legal-texts
+    let results: any[] = [];
+    try {
+      const searchRes = await searchTexts(params);
+      results = searchRes?.hits || searchRes?.data || [];
+    } catch {
+      const textsRes = await getLegalTexts(params);
+      results = textsRes?.data || [];
+    }
+
+    if (results.length > 0 || searchQuery.value.trim()) {
+      apiTexts.value = results.map((t: any) => ({
+        id: t.id || t.document?.id,
+        title: t.title || t.document?.title,
+        reference: t.reference || t.document?.reference || '',
+        country: t.country?.name || t.document?.country || '',
+        flag: '',
+        date: t.promulgationDate || t.document?.promulgationDate
+          ? new Date(t.promulgationDate || t.document?.promulgationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '',
+        dateSort: t.promulgationDate
+          ? parseInt(new Date(t.promulgationDate).toISOString().slice(0, 10).replace(/-/g, ''))
+          : 0,
+        type: t.textType || t.document?.textType || '',
+        isInForce: t.isInForce ?? t.document?.isInForce ?? true,
+        verified: t.isVerified ?? t.document?.isVerified ?? false,
+        themes: (t.themes || t.document?.themes || []).map((th: any) => th.name || th),
+        summary: t.summary || t.document?.summary || '',
+      }));
+      usingApiData.value = true;
+    } else {
+      usingApiData.value = false;
+    }
+  } catch (e) {
+    console.log('API not available, using mock data');
+    usingApiData.value = false;
+  } finally {
+    loading.value = false;
+  }
+};
 
 // Filter options
 const paysOptions = [
@@ -403,7 +458,7 @@ const allTexts = [
 
 // Computed: filtered results
 const filteredTexts = computed(() => {
-  let results = [...allTexts];
+  let results = usingApiData.value ? [...apiTexts.value] : [...allTexts];
 
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase();
@@ -454,10 +509,12 @@ watch(filteredTexts, () => {
 
 const onSearch = () => {
   paginationFirst.value = 0;
+  fetchFromApi();
 };
 
 const onFilter = () => {
   paginationFirst.value = 0;
+  fetchFromApi();
 };
 
 const resetFilters = () => {
@@ -467,6 +524,7 @@ const resetFilters = () => {
   selectedType.value = null;
   selectedStatut.value = null;
   paginationFirst.value = 0;
+  usingApiData.value = false;
 };
 </script>
 

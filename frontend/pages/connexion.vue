@@ -45,6 +45,11 @@
         <NuxtLink to="/mot-de-passe-oublie" class="forgot-link">Mot de passe oublié ?</NuxtLink>
       </div>
 
+      <!-- Error message -->
+      <div v-if="errorMessage" class="error-alert">
+        {{ errorMessage }}
+      </div>
+
       <button type="submit" class="btn-submit" :disabled="loading">
         <Loader2 v-if="loading" :size="18" class="spin" />
         <span>{{ loading ? 'Connexion...' : 'Se connecter' }}</span>
@@ -70,21 +75,43 @@
 <script setup lang="ts">
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 definePageMeta({ layout: 'auth' });
+
+const router = useRouter();
+const { login } = useAuth();
 
 const form = ref({ email: '', password: '', remember: false });
 const showPassword = ref(false);
 const loading = ref(false);
+const errorMessage = ref('');
 
 const handleLogin = async () => {
   loading.value = true;
-  // TODO: API call
-  setTimeout(() => { loading.value = false; }, 1500);
+  errorMessage.value = '';
+  try {
+    await login(form.value.email, form.value.password);
+    router.push('/profil');
+  } catch (e: any) {
+    errorMessage.value = e?.data?.message || e?.message || 'Identifiants incorrects. Veuillez réessayer.';
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
 <style scoped>
+.error-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(198, 40, 40, 0.08);
+  border: 1px solid rgba(198, 40, 40, 0.25);
+  color: var(--juris-danger, #c62828);
+  font-size: var(--font-sm);
+  font-weight: 500;
+}
+
 .login-page h1 {
   font-size: var(--font-2xl);
   font-weight: 700;

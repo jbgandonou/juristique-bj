@@ -91,12 +91,15 @@ export const useApi = () => {
   const getLegalText = (id: string) =>
     apiFetch<LegalText>(`/legal-texts/${id}`);
 
-  // Search
-  const searchTexts = (q: string, filters: Record<string, string> = {}) => {
-    const params = new URLSearchParams({ ...filters });
-    if (q) params.set('q', q);
-    return apiFetch<PaginatedResult<LegalText>>(`/legal-texts?${params}`);
+  // Search (Typesense)
+  const searchTexts = (params: Record<string, string> = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiFetch<any>(`/search?${query}`);
   };
+
+  // Comments
+  const getCommentsByText = (textId: string, page = 1, limit = 20) =>
+    apiFetch<PaginatedResult<any>>(`/comments/by-text/${textId}?page=${page}&limit=${limit}`);
 
   return {
     apiFetch,
@@ -108,6 +111,7 @@ export const useApi = () => {
     getLegalTexts,
     getLegalText,
     searchTexts,
+    getCommentsByText,
   };
 };
 

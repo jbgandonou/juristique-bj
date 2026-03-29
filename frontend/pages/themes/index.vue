@@ -71,10 +71,12 @@ import {
   Ship, Train, Radio, Phone, Camera, Wrench, FlaskConical,
   Zap, Sun, Wind,
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const searchQuery = ref('');
 const selectedCategory = ref('tous');
+const loading = ref(true);
+const { getThemes } = useApi();
 
 const categories = [
   { label: 'Tous', value: 'tous', count: 42 },
@@ -86,7 +88,23 @@ const categories = [
   { label: 'Secteurs', value: 'secteurs', count: 5 },
 ];
 
-const allThemes = [
+const iconMap: Record<string, any> = {
+  'constitution': ScrollText, 'droit-administratif': Building2, 'droit-constitutionnel': Scale,
+  'droit-penal': Gavel, 'procedure-penale': Scale, 'droit-fiscal': Receipt, 'droit-douanier': Truck,
+  'droit-electoral': Users, 'marches-publics': Briefcase, 'droit-foncier': Home,
+  'droit-affaires-ohada': Briefcase, 'droit-societes': Building2, 'droit-bancaire': Landmark,
+  'droit-assurances': ShieldCheck, 'droit-concurrence': Scale, 'commerce-international': Globe,
+  'droit-contrats': ScrollText, 'propriete-intellectuelle': ShieldCheck, 'microfinance-umoa': Banknote,
+  'droit-travail': Users, 'securite-sociale': Heart, 'droit-famille': Baby, 'droit-personnes': Users,
+  'sante-publique': Stethoscope, 'education': GraduationCap, 'logement-urbanisme': Home,
+  'numerique-telecoms': Wifi, 'donnees-personnelles': ShieldCheck, 'cybersecurite': Cpu,
+  'commerce-electronique': Phone, 'environnement': Leaf, 'energie-electrique': Bolt,
+  'energie-renouvelable': Sun, 'gestion-dechets': TreePine, 'ressources-eau': Droplets,
+  'biodiversite': TreePine, 'mines-ressources': Mountain, 'agriculture': Wheat, 'elevage': Beef,
+  'peche': Fish, 'transport': Plane, 'industrie': Factory,
+};
+
+const mockThemes = [
   // Droit public
   { name: 'Constitution', slug: 'constitution', icon: ScrollText, count: 26, category: 'public' },
   { name: 'Droit administratif', slug: 'droit-administratif', icon: Building2, count: 43, category: 'public' },
@@ -142,8 +160,29 @@ const allThemes = [
   { name: 'Industrie', slug: 'industrie', icon: Factory, count: 28, category: 'secteurs' },
 ];
 
+const allThemes = ref(mockThemes);
+
+onMounted(async () => {
+  try {
+    const res = await getThemes(1, 100);
+    if (res.data?.length) {
+      allThemes.value = res.data.map(t => ({
+        name: t.name,
+        slug: t.slug,
+        icon: iconMap[t.slug] || BookOpen,
+        count: t.textCount,
+        category: 'tous', // API doesn't have categories; keep filtering by name search only
+      }));
+    }
+  } catch (e) {
+    console.log('API not available, using mock theme data');
+  } finally {
+    loading.value = false;
+  }
+});
+
 const filteredThemes = computed(() => {
-  let results = allThemes;
+  let results = allThemes.value;
 
   if (selectedCategory.value !== 'tous') {
     results = results.filter(t => t.category === selectedCategory.value);

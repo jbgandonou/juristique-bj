@@ -384,15 +384,20 @@ import {
   Plus, Trash2, ToggleLeft, ToggleRight, MapPin, Calendar, Scale,
   FileText, Edit,
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const { user: authUser, isAuthenticated, authFetch } = useAuth();
+const { getLegalTexts } = useApi();
 
 // ── User data ────────────────────────────────────────────────────
-const user = ref({
-  name: 'Madeleine Ahouansou',
-  profession: 'Avocate au Barreau du Bénin',
-  country: 'Bénin',
+const user = computed(() => ({
+  name: authUser.value?.fullName || 'Madeleine Ahouansou',
+  profession: authUser.value?.profession || 'Avocate au Barreau du Bénin',
+  country: authUser.value?.country?.name || authUser.value?.country || 'Bénin',
   memberSince: 'janvier 2024',
-});
+}));
 
 const userInitials = computed(() => {
   return user.value.name
@@ -446,6 +451,76 @@ const bookmarks = ref([
     note: null,
   },
 ]);
+
+onMounted(async () => {
+  // Redirect to login if not authenticated
+  if (!isAuthenticated.value) {
+    router.push('/connexion');
+    return;
+  }
+
+  // Attempt to load real bookmarks and comments from API
+  try {
+    const bookmarksRes = await authFetch<any>('/bookmarks?page=1&limit=20');
+    if (bookmarksRes?.data?.length) {
+      bookmarks.value = bookmarksRes.data.map((b: any) => ({
+        id: b.legalText?.id || b.id,
+        title: b.legalText?.title || b.title || '',
+        country: b.legalText?.country?.name || '',
+        date: b.legalText?.promulgationDate
+          ? new Date(b.legalText.promulgationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '',
+        type: b.legalText?.textType || '',
+        isInForce: b.legalText?.isInForce ?? true,
+        themes: (b.legalText?.themes || []).map((t: any) => t.name || t),
+        note: b.note || null,
+      }));
+    }
+  } catch (e) {
+    console.log('Bookmarks API not available, using mock data');
+  }
+
+  try {
+    const commentsRes = await authFetch<any>('/comments/my-comments?page=1&limit=20');
+    if (commentsRes?.data?.length) {
+      comments.value = commentsRes.data.map((c: any) => ({
+        id: c.id,
+        textId: c.legalText?.id || c.legalTextId || '',
+        textTitle: c.legalText?.title || '',
+        content: c.content || c.body || '',
+        date: c.createdAt
+          ? new Date(c.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '',
+        type: c.type || 'Commentaire',
+      }));
+    }
+  } catch (e) {
+    console.log('Comments API not available, using mock data');
+  }
+
+  try {
+    const alertsRes = await authFetch<any>('/alerts?page=1&limit=20');
+    if (alertsRes?.data?.length) {
+      alerts.value = alertsRes.data.map((a: any) => ({
+        id: a.id,
+        theme: a.theme || a.query || '',
+        country: a.country?.name || a.countryFilter || '',
+        frequency: a.frequency || 'Hebdomadaire',
+        active: a.isActive ?? true,
+      }));
+    }
+  } catch (e) {
+    console.log('Alerts API not available, using mock data');
+  }
+
+  // Pre-fill settings form with real user data
+  if (authUser.value) {
+    form.value.name = authUser.value.fullName || form.value.name;
+    form.value.email = authUser.value.email || form.value.email;
+    form.value.profession = authUser.value.profession || form.value.profession;
+    form.value.barNumber = authUser.value.barNumber || form.value.barNumber;
+  }
+});
 
 const removeBookmark = (id: string) => {
   const idx = bookmarks.value.findIndex(b => b.id === id);

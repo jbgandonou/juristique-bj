@@ -123,11 +123,12 @@ import {
   ChevronRight, MapPin, Calendar, Scale,
   ScrollText, Briefcase, Bolt, Wifi, Leaf, Landmark, Gavel, Cpu,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const searchQuery = ref('');
+const loading = ref(true);
 
 const goToSearch = () => {
   if (searchQuery.value.trim()) {
@@ -135,7 +136,20 @@ const goToSearch = () => {
   }
 };
 
-const popularThemes = [
+// Icon map for themes from API (keyed by slug)
+const iconMap: Record<string, any> = {
+  'constitution': ScrollText,
+  'droit-affaires-ohada': Briefcase,
+  'energie-electrique': Bolt,
+  'numerique-telecoms': Wifi,
+  'environnement': Leaf,
+  'droit-bancaire': Landmark,
+  'droit-penal': Gavel,
+  'cybersecurite': Cpu,
+};
+
+// Mock data — kept as fallback if API is not available
+const popularThemes = ref([
   { name: 'Constitution', slug: 'constitution', icon: ScrollText, count: 26 },
   { name: 'Droit des affaires', slug: 'droit-affaires-ohada', icon: Briefcase, count: 45 },
   { name: 'Énergie électrique', slug: 'energie-electrique', icon: Bolt, count: 38 },
@@ -144,10 +158,9 @@ const popularThemes = [
   { name: 'Droit bancaire', slug: 'droit-bancaire', icon: Landmark, count: 31 },
   { name: 'Droit pénal', slug: 'droit-penal', icon: Gavel, count: 28 },
   { name: 'Cybersécurité', slug: 'cybersecurite', icon: Cpu, count: 19 },
-];
+]);
 
-// Mock data — will be replaced by API calls
-const recentTexts = [
+const recentTexts = ref([
   {
     id: '1',
     title: 'Loi n°2024-15 portant Code du numérique en République du Bénin',
@@ -184,7 +197,45 @@ const recentTexts = [
     isInForce: true,
     themes: ['Constitution'],
   },
-];
+]);
+
+const { getThemes, getLegalTexts } = useApi();
+
+onMounted(async () => {
+  try {
+    const [themesRes, textsRes] = await Promise.all([
+      getThemes(1, 8),
+      getLegalTexts({ page: '1', limit: '4', status: 'published' }),
+    ]);
+
+    if (themesRes.data?.length) {
+      popularThemes.value = themesRes.data.map(t => ({
+        name: t.name,
+        slug: t.slug,
+        icon: iconMap[t.slug] || FileText,
+        count: t.textCount,
+      }));
+    }
+
+    if (textsRes.data?.length) {
+      recentTexts.value = textsRes.data.map(t => ({
+        id: t.id,
+        title: t.title,
+        country: t.country?.name || '',
+        date: t.promulgationDate
+          ? new Date(t.promulgationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '',
+        type: t.textType,
+        isInForce: t.isInForce,
+        themes: t.themes?.map(th => th.name) || [],
+      }));
+    }
+  } catch (e) {
+    console.log('API not available, using mock data');
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <style scoped>

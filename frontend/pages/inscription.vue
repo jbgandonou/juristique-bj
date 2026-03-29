@@ -68,6 +68,11 @@
         </label>
       </div>
 
+      <!-- Error message -->
+      <div v-if="errorMessage" class="error-alert">
+        {{ errorMessage }}
+      </div>
+
       <button type="submit" class="btn-submit" :disabled="loading">
         <Loader2 v-if="loading" :size="18" class="spin" />
         <span>{{ loading ? 'Création...' : 'Créer mon compte' }}</span>
@@ -92,11 +97,16 @@
 import { User, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-vue-next';
 import Select from 'primevue/select';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 definePageMeta({ layout: 'auth' });
 
+const router = useRouter();
+const { register } = useAuth();
+
 const showPassword = ref(false);
 const loading = ref(false);
+const errorMessage = ref('');
 
 const form = ref({
   fullName: '',
@@ -127,11 +137,35 @@ const countries = [
 
 const handleRegister = async () => {
   loading.value = true;
-  setTimeout(() => { loading.value = false; }, 1500);
+  errorMessage.value = '';
+  try {
+    await register({
+      email: form.value.email,
+      password: form.value.password,
+      fullName: form.value.fullName,
+      profession: form.value.profession || undefined,
+      countryId: (form.value.country as any)?.code || undefined,
+    });
+    router.push('/profil');
+  } catch (e: any) {
+    errorMessage.value = e?.data?.message || e?.message || 'Une erreur est survenue. Veuillez réessayer.';
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
 <style scoped>
+.error-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(198, 40, 40, 0.08);
+  border: 1px solid rgba(198, 40, 40, 0.25);
+  color: var(--juris-danger, #c62828);
+  font-size: var(--font-sm);
+  font-weight: 500;
+}
+
 .register-page h1 {
   font-size: var(--font-2xl);
   font-weight: 700;

@@ -90,11 +90,13 @@
 
 <script setup lang="ts">
 import { Globe, Search, FileText, ChevronRight } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 const searchQuery = ref('');
+const loading = ref(true);
+const { getCountries } = useApi();
 
-const regions = [
+const mockRegions = [
   {
     name: 'Afrique de l\'Ouest',
     countries: [
@@ -153,11 +155,41 @@ const regions = [
   },
 ];
 
+const regions = ref(mockRegions);
+
+onMounted(async () => {
+  try {
+    const res = await getCountries(1, 100);
+    if (res.data?.length) {
+      // Group API countries by region
+      const regionMap: Record<string, typeof mockRegions[0]['countries']> = {};
+      for (const c of res.data) {
+        const regionName = c.region || 'Autres';
+        if (!regionMap[regionName]) regionMap[regionName] = [];
+        regionMap[regionName].push({
+          name: c.name,
+          slug: c.code.toLowerCase(),
+          flag: '',
+          textCount: 0,
+        });
+      }
+      const apiRegions = Object.entries(regionMap).map(([name, countries]) => ({ name, countries }));
+      if (apiRegions.length > 0) {
+        regions.value = apiRegions;
+      }
+    }
+  } catch (e) {
+    console.log('API not available, using mock country data');
+  } finally {
+    loading.value = false;
+  }
+});
+
 const filteredByRegion = computed(() => {
-  if (!searchQuery.value.trim()) return regions;
+  if (!searchQuery.value.trim()) return regions.value;
 
   const q = searchQuery.value.toLowerCase();
-  return regions
+  return regions.value
     .map(region => ({
       ...region,
       countries: region.countries.filter(c => c.name.toLowerCase().includes(q)),

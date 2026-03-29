@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: juristique-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: cd backend && npm ci && npm run build
+    startCommand: cd backend && node dist/main.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TYPESENSE_HOST
+        sync: false
+      - key: TYPESENSE_PORT
+        value: "443"
+      - key: TYPESENSE_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: APP_URL
+        sync: false

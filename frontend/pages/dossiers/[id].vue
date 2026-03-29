@@ -255,17 +255,66 @@
         </aside>
       </div>
 
-      <!-- Add Text Modal -->
+      <!-- Add Text Modal — Search & Pick -->
       <div v-if="showAddTextModal" class="modal-overlay" @click.self="showAddTextModal = false">
-        <div class="modal-card glass-card fade-in-up">
+        <div class="modal-card glass-card fade-in-up" style="max-width: 600px;">
           <h3>Ajouter un texte au dossier</h3>
+
+          <!-- Search input -->
           <div class="form-group">
-            <label>Identifiant du texte</label>
-            <input v-model="addTextId" type="text" class="form-input" placeholder="ID ou référence du texte" />
+            <label>Rechercher un texte</label>
+            <div class="search-input-wrap">
+              <Search :size="18" class="search-input-icon" />
+              <input
+                v-model="textSearchQuery"
+                type="text"
+                class="form-input"
+                style="padding-left: 40px;"
+                placeholder="Tapez le titre d'une loi, décret, constitution..."
+                @input="onTextSearch"
+              />
+            </div>
           </div>
+
+          <!-- Loading -->
+          <div v-if="textSearchLoading" style="text-align: center; padding: 16px;">
+            <div class="skeleton" style="height: 48px; margin-bottom: 8px;"></div>
+            <div class="skeleton" style="height: 48px; margin-bottom: 8px;"></div>
+            <div class="skeleton" style="height: 48px;"></div>
+          </div>
+
+          <!-- Search results -->
+          <div v-else-if="textSearchResults.length" class="text-search-results">
+            <div
+              v-for="text in textSearchResults"
+              :key="text.id"
+              class="text-search-item"
+              :class="{ 'already-added': isTextInFolder(text.id) }"
+              @click="!isTextInFolder(text.id) && pickText(text)"
+            >
+              <div class="text-search-info">
+                <span class="text-search-title">{{ text.title }}</span>
+                <span class="text-search-meta">
+                  {{ text.country?.name || '' }} · {{ text.textType || '' }} · {{ text.reference || '' }}
+                </span>
+              </div>
+              <span v-if="isTextInFolder(text.id)" class="text-search-added">Déjà ajouté</span>
+              <Plus v-else :size="18" class="text-search-add-icon" />
+            </div>
+          </div>
+
+          <!-- No results -->
+          <div v-else-if="textSearchQuery.length >= 2" class="text-search-empty">
+            Aucun texte trouvé pour « {{ textSearchQuery }} »
+          </div>
+
+          <!-- Hint -->
+          <div v-else class="text-search-hint">
+            Tapez au moins 2 caractères pour rechercher
+          </div>
+
           <div class="modal-actions">
-            <button class="btn-cancel" @click="showAddTextModal = false">Annuler</button>
-            <button class="btn-submit" :disabled="!addTextId.trim()" @click="handleAddText">Ajouter</button>
+            <button class="btn-cancel" @click="showAddTextModal = false; textSearchQuery = ''; textSearchResults = [];">Fermer</button>
           </div>
         </div>
       </div>
@@ -286,7 +335,7 @@
 </template>
 
 <script setup lang="ts">
-import { FolderOpen, FileText, Users, Plus, X, Trash2, Share2, Edit3, MessageSquare, StickyNote, Bell } from 'lucide-vue-next';
+import { FolderOpen, FileText, Users, Plus, X, Trash2, Share2, Edit3, MessageSquare, StickyNote, Bell, Search } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -306,6 +355,10 @@ const editName = ref('');
 
 const showAddTextModal = ref(false);
 const addTextId = ref('');
+const textSearchQuery = ref('');
+const textSearchResults = ref<any[]>([]);
+const textSearchLoading = ref(false);
+let searchTimeout: any = null;
 
 const showDeleteConfirm = ref(false);
 
@@ -367,16 +420,40 @@ const removeText = async (textId: string) => {
   folder.value.texts = folder.value.texts.filter((t: any) => t.id !== textId);
 };
 
-const handleAddText = async () => {
-  try {
-    const result = await authFetch(`/folders/${folderId}/texts`, { method: 'POST', body: { textId: addTextId.value } });
-    folder.value.texts = folder.value.texts || [];
-    folder.value.texts.push(result.text ?? { id: addTextId.value, title: addTextId.value, reference: addTextId.value });
-  } catch {
-    // ignore
+const onTextSearch = () => {
+  clearTimeout(searchTimeout);
+  if (textSearchQuery.value.length < 2) {
+    textSearchResults.value = [];
+    return;
   }
-  showAddTextModal.value = false;
-  addTextId.value = '';
+  textSearchLoading.value = true;
+  searchTimeout = setTimeout(async () => {
+    try {
+      const config = useRuntimeConfig();
+      const res = await $fetch<any>(`${config.public.apiBaseUrl}/legal-texts?limit=10&status=published`, {
+        params: { q: textSearchQuery.value },
+      });
+      textSearchResults.value = res?.data || [];
+    } catch {
+      textSearchResults.value = [];
+    } finally {
+      textSearchLoading.value = false;
+    }
+  }, 300);
+};
+
+const isTextInFolder = (textId: string) => {
+  return folder.value.texts?.some((t: any) => t.id === textId);
+};
+
+const pickText = async (text: any) => {
+  try {
+    await authFetch(`/folders/${folderId}/texts`, { method: 'POST', body: { textId: text.id } });
+    if (!folder.value.texts) folder.value.texts = [];
+    folder.value.texts.push(text);
+  } catch {
+    // already added or error
+  }
 };
 
 const startEditAnnotation = (annotation: any) => {
@@ -615,4 +692,24 @@ textarea.form-input { resize: vertical; }
   .folder-header-body { padding: 16px; }
   .folder-name-display h1 { font-size: var(--font-xl); }
 }
+
+/* Text search in add modal */
+.search-input-wrap { position: relative; }
+.search-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--juris-text-muted); pointer-events: none; }
+
+.text-search-results { max-height: 320px; overflow-y: auto; border: 1px solid var(--juris-border-light); border-radius: var(--radius-md); margin-top: 8px; }
+
+.text-search-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--juris-border-light); cursor: pointer; transition: background 0.15s; }
+.text-search-item:last-child { border-bottom: none; }
+.text-search-item:hover:not(.already-added) { background: var(--juris-primary-50); }
+.text-search-item.already-added { opacity: 0.5; cursor: default; }
+
+.text-search-info { flex: 1; min-width: 0; }
+.text-search-title { display: block; font-size: var(--font-sm); font-weight: 600; color: var(--juris-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.text-search-meta { display: block; font-size: var(--font-xs); color: var(--juris-text-muted); margin-top: 2px; }
+
+.text-search-added { font-size: var(--font-xs); color: var(--juris-text-muted); white-space: nowrap; margin-left: 12px; }
+.text-search-add-icon { color: var(--juris-primary); flex-shrink: 0; margin-left: 12px; }
+
+.text-search-empty, .text-search-hint { text-align: center; padding: 24px 16px; font-size: var(--font-sm); color: var(--juris-text-muted); }
 </style>

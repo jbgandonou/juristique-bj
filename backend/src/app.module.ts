@@ -14,6 +14,7 @@ import { SearchModule } from './search/search.module';
 import { CommentsModule } from './comments/comments.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
       useFactory: (config: ConfigService) => config.get('database')!,
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    MailModule,
     CountriesModule,
     ThemesModule,
     LegalTextsModule,

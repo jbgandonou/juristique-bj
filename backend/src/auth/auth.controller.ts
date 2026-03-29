@@ -29,4 +29,22 @@ export class AuthController {
   getProfile(@Request() req: any) {
     return this.authService.getProfile(req.user.id);
   }
+
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Verify email with token' })
+  verifyEmail(@Body('token') token: string) {
+    return this.authService.verifyEmail(token);
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request password reset' })
+  forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password with token' })
+  resetPassword(@Body() body: { token: string; password: string }) {
+    return this.authService.resetPassword(body.token, body.password);
+  }
 }

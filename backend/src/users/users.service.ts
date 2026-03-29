@@ -2,6 +2,7 @@ import { Injectable, ConflictException, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -44,5 +45,55 @@ export class UsersService {
 
   async updateLastLogin(id: string): Promise<void> {
     await this.repo.update(id, { lastLoginAt: new Date() });
+  }
+
+  async setVerificationToken(userId: string): Promise<string> {
+    const token = randomBytes(32).toString('hex');
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 24);
+    await this.repo.update(userId, {
+      verificationToken: token,
+      verificationTokenExpires: expires,
+    });
+    return token;
+  }
+
+  async verifyEmail(token: string): Promise<User> {
+    const user = await this.repo.findOne({
+      where: { verificationToken: token },
+    });
+    if (!user) throw new NotFoundException('Invalid verification token');
+    if (user.verificationTokenExpires < new Date()) {
+      throw new NotFoundException('Verification token expired');
+    }
+    user.isVerified = true;
+    user.verificationToken = null as any;
+    user.verificationTokenExpires = null as any;
+    return this.repo.save(user);
+  }
+
+  async setResetToken(email: string): Promise<{ token: string; user: User }> {
+    const user = await this.findByEmail(email);
+    if (!user) throw new NotFoundException('User not found');
+    const token = randomBytes(32).toString('hex');
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 1);
+    await this.repo.update(user.id, {
+      resetToken: token,
+      resetTokenExpires: expires,
+    });
+    return { token, user };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<User> {
+    const user = await this.repo.findOne({ where: { resetToken: token } });
+    if (!user) throw new NotFoundException('Invalid reset token');
+    if (user.resetTokenExpires < new Date()) {
+      throw new NotFoundException('Reset token expired');
+    }
+    user.passwordHash = await bcrypt.hash(newPassword, 12);
+    user.resetToken = null as any;
+    user.resetTokenExpires = null as any;
+    return this.repo.save(user);
   }
 }

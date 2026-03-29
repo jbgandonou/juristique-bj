@@ -47,4 +47,16 @@ export class User extends BaseEntity {
 
   @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
   lastLoginAt: Date;
+
+  @Column({ name: 'verification_token', nullable: true })
+  verificationToken: string;
+
+  @Column({ name: 'verification_token_expires', type: 'timestamp', nullable: true })
+  verificationTokenExpires: Date;
+
+  @Column({ name: 'reset_token', nullable: true })
+  resetToken: string;
+
+  @Column({ name: 'reset_token_expires', type: 'timestamp', nullable: true })
+  resetTokenExpires: Date;
 }

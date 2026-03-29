@@ -590,3 +590,154 @@ a:hover {
     padding: 14px 16px 14px 44px;
   }
 }
+
+/* === Labels === */
+.label-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.label-badge.urgent {
+  background: rgba(198, 40, 40, 0.1);
+  color: var(--juris-danger);
+  border: 1px solid rgba(198, 40, 40, 0.2);
+}
+
+.label-badge.a_relire {
+  background: rgba(249, 168, 37, 0.1);
+  color: #E65100;
+  border: 1px solid rgba(249, 168, 37, 0.2);
+}
+
+.label-badge.important {
+  background: rgba(198, 148, 42, 0.1);
+  color: var(--juris-secondary-dark);
+  border: 1px solid rgba(198, 148, 42, 0.2);
+}
+
+.label-badge.en_cours {
+  background: rgba(21, 101, 192, 0.1);
+  color: var(--juris-info);
+  border: 1px solid rgba(21, 101, 192, 0.2);
+}
+
+.label-badge.termine {
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--juris-success);
+  border: 1px solid rgba(46, 125, 50, 0.2);
+}
+
+.label-badge.question {
+  background: rgba(123, 31, 162, 0.1);
+  color: #7B1FA2;
+  border: 1px solid rgba(123, 31, 162, 0.2);
+}
+
+/* Sticker display */
+.sticker {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.sticker-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sticker-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--juris-border-light);
+  border-radius: var(--radius-md);
+  background: var(--juris-surface);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.15s ease;
+}
+
+.sticker-btn:hover {
+  border-color: var(--juris-primary-lighter);
+  background: var(--juris-primary-50);
+  transform: scale(1.1);
+}
+
+.sticker-btn.active {
+  border-color: var(--juris-primary);
+  background: var(--juris-primary-100);
+}
+
+/* Label picker */
+.label-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.label-picker-btn {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--juris-border);
+  background: var(--juris-surface);
+  transition: all 0.15s ease;
+  font-family: var(--font-family);
+}
+
+.label-picker-btn:hover {
+  transform: scale(1.05);
+}
+
+.label-picker-btn.active {
+  border-width: 2px;
+}
+
+/* Reminder card */
+.reminder-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--juris-surface);
+  border: 1px solid var(--juris-border-light);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+}
+
+.reminder-card:hover {
+  border-color: var(--juris-primary-lighter);
+}
+
+.reminder-card.completed {
+  opacity: 0.5;
+}
+
+.reminder-card.overdue {
+  border-left: 3px solid var(--juris-danger);
+}
+
+.reminder-card.upcoming {
+  border-left: 3px solid var(--juris-warning);
+}
+
+.reminder-card .reminder-time {
+  font-size: var(--font-xs);
+  color: var(--juris-text-muted);
+}
+
+.reminder-card .reminder-title {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--juris-text);
+}

@@ -95,10 +95,12 @@
             <div v-if="annotations.length" class="annotations-list">
               <div v-for="annotation in annotations" :key="annotation.id" class="annotation-card">
                 <div class="annotation-meta">
+                  <span v-if="annotation.sticker" class="sticker">{{ annotation.sticker }}</span>
                   <span class="annotation-ref">
                     <MessageSquare :size="12" />
                     {{ annotation.articleRef || 'Note générale' }}
                   </span>
+                  <span v-if="annotation.label" class="label-badge" :class="annotation.label">{{ labelOptions.find(l => l.value === annotation.label)?.text || annotation.label }}</span>
                   <span v-if="annotation.textTitle" class="annotation-text-ref">{{ annotation.textTitle }}</span>
                   <button class="btn-icon-danger hover-lift" @click="deleteAnnotationItem(annotation.id)">
                     <Trash2 :size="14" />
@@ -124,6 +126,58 @@
               </div>
               <div class="form-group">
                 <textarea v-model="newAnnotation.content" class="form-input" rows="3" placeholder="Votre annotation..."></textarea>
+              </div>
+              <!-- Sticker picker -->
+              <div class="form-group">
+                <label class="form-label-sm">Sticker</label>
+                <div class="sticker-picker">
+                  <button
+                    v-for="s in stickers"
+                    :key="s"
+                    type="button"
+                    class="sticker-btn"
+                    :class="{ active: newAnnotation.sticker === s }"
+                    @click="newAnnotation.sticker = newAnnotation.sticker === s ? '' : s"
+                  >{{ s }}</button>
+                </div>
+              </div>
+              <!-- Label picker -->
+              <div class="form-group">
+                <label class="form-label-sm">Label</label>
+                <div class="label-picker">
+                  <button
+                    v-for="lbl in labelOptions"
+                    :key="lbl.value"
+                    type="button"
+                    class="label-picker-btn"
+                    :class="[{ active: newAnnotation.label === lbl.value }, `lp-annot-${lbl.value}`]"
+                    @click="newAnnotation.label = newAnnotation.label === lbl.value ? '' : lbl.value"
+                  >{{ lbl.text }}</button>
+                </div>
+              </div>
+              <!-- Reminder link -->
+              <div class="reminder-link-row">
+                <button type="button" class="btn-reminder-link hover-lift" @click="showReminderForm = !showReminderForm">
+                  <Bell :size="14" />
+                  {{ showReminderForm ? 'Masquer le rappel' : 'Ajouter un rappel' }}
+                </button>
+              </div>
+              <!-- Inline reminder form -->
+              <div v-if="showReminderForm" class="inline-reminder-form">
+                <div class="form-group">
+                  <input v-model="newAnnotationReminder.title" type="text" class="form-input" placeholder="Titre du rappel" />
+                </div>
+                <div class="form-group">
+                  <input v-model="newAnnotationReminder.remindAt" type="datetime-local" class="form-input" />
+                </div>
+                <button
+                  type="button"
+                  class="btn-add-sm hover-lift"
+                  :disabled="!newAnnotationReminder.title.trim() || !newAnnotationReminder.remindAt"
+                  @click="addAnnotationReminder"
+                >
+                  <Bell :size="13" /> Créer le rappel
+                </button>
               </div>
               <button class="btn-add hover-lift" :disabled="!newAnnotation.content.trim()" @click="addAnnotation">
                 <Plus :size="16" /> Ajouter l'annotation
@@ -227,7 +281,7 @@
 </template>
 
 <script setup lang="ts">
-import { FolderOpen, FileText, Users, Plus, X, Trash2, Share2, Edit3, MessageSquare, StickyNote } from 'lucide-vue-next';
+import { FolderOpen, FileText, Users, Plus, X, Trash2, Share2, Edit3, MessageSquare, StickyNote, Bell } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -253,8 +307,22 @@ const showDeleteConfirm = ref(false);
 const editingAnnotation = ref<string | null>(null);
 const editAnnotationContent = ref('');
 
-const newAnnotation = ref({ content: '', articleRef: '' });
+const newAnnotation = ref({ content: '', articleRef: '', sticker: '', label: '' });
 const newShare = ref({ email: '', permission: 'read' });
+
+const showReminderForm = ref(false);
+const newAnnotationReminder = ref({ title: '', remindAt: '' });
+
+const stickers = ['⚠️', '✅', '📌', '🔥', '💡', '❓', '⏰', '📝', '🎯', '⭐', '🔍', '📋'];
+
+const labelOptions = [
+  { value: 'urgent', text: 'Urgent' },
+  { value: 'a_relire', text: 'À relire' },
+  { value: 'important', text: 'Important' },
+  { value: 'en_cours', text: 'En cours' },
+  { value: 'termine', text: 'Terminé' },
+  { value: 'question', text: 'Question' },
+];
 
 onMounted(async () => {
   try {
@@ -337,13 +405,39 @@ const addAnnotation = async () => {
   try {
     const created = await authFetch('/annotations', {
       method: 'POST',
-      body: { folderId, content: newAnnotation.value.content, articleRef: newAnnotation.value.articleRef },
+      body: {
+        folderId,
+        content: newAnnotation.value.content,
+        articleRef: newAnnotation.value.articleRef,
+        sticker: newAnnotation.value.sticker || undefined,
+        label: newAnnotation.value.label || undefined,
+      },
     });
     annotations.value.push(created);
   } catch {
     annotations.value.push({ id: Date.now().toString(), ...newAnnotation.value });
   }
-  newAnnotation.value = { content: '', articleRef: '' };
+  newAnnotation.value = { content: '', articleRef: '', sticker: '', label: '' };
+  showReminderForm.value = false;
+  newAnnotationReminder.value = { title: '', remindAt: '' };
+};
+
+const addAnnotationReminder = async () => {
+  if (!newAnnotationReminder.value.title.trim() || !newAnnotationReminder.value.remindAt) return;
+  try {
+    await authFetch('/reminders', {
+      method: 'POST',
+      body: {
+        title: newAnnotationReminder.value.title,
+        remindAt: newAnnotationReminder.value.remindAt,
+        folderId,
+      },
+    });
+  } catch {
+    // silently ignore — reminder is best-effort
+  }
+  showReminderForm.value = false;
+  newAnnotationReminder.value = { title: '', remindAt: '' };
 };
 
 const addShare = async () => {
@@ -484,6 +578,30 @@ textarea.form-input { resize: vertical; }
 .btn-cancel { padding: 10px 20px; background: none; border: 1px solid var(--juris-border); border-radius: 10px; font-size: var(--font-sm); cursor: pointer; font-family: var(--font-family); }
 .btn-submit { padding: 10px 20px; background: var(--juris-gradient-primary); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: var(--font-sm); cursor: pointer; font-family: var(--font-family); }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.form-label-sm { font-size: var(--font-xs); font-weight: 600; color: var(--juris-text-secondary); display: block; margin-bottom: 4px; }
+
+/* Label picker colors scoped to annotation form */
+.lp-annot-urgent { color: var(--juris-danger); }
+.lp-annot-a_relire { color: #E65100; }
+.lp-annot-important { color: var(--juris-secondary-dark); }
+.lp-annot-en_cours { color: var(--juris-info); }
+.lp-annot-termine { color: var(--juris-success); }
+.lp-annot-question { color: #7B1FA2; }
+.label-picker-btn.active.lp-annot-urgent { background: rgba(198, 40, 40, 0.08); border-color: var(--juris-danger); }
+.label-picker-btn.active.lp-annot-a_relire { background: rgba(249, 168, 37, 0.08); border-color: #E65100; }
+.label-picker-btn.active.lp-annot-important { background: rgba(198, 148, 42, 0.08); border-color: var(--juris-secondary-dark); }
+.label-picker-btn.active.lp-annot-en_cours { background: rgba(21, 101, 192, 0.08); border-color: var(--juris-info); }
+.label-picker-btn.active.lp-annot-termine { background: rgba(46, 125, 50, 0.08); border-color: var(--juris-success); }
+.label-picker-btn.active.lp-annot-question { background: rgba(123, 31, 162, 0.08); border-color: #7B1FA2; }
+
+.reminder-link-row { margin-bottom: 10px; }
+.btn-reminder-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: none; border: 1px dashed var(--juris-border); border-radius: 8px; font-size: var(--font-xs); font-weight: 600; color: var(--juris-primary-light); cursor: pointer; font-family: var(--font-family); transition: all 0.15s ease; }
+.btn-reminder-link:hover { border-color: var(--juris-primary-lighter); background: var(--juris-primary-50); }
+
+.inline-reminder-form { background: var(--juris-primary-50); border-radius: var(--radius-md); padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.btn-add-sm { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--juris-gradient-primary); color: white; border: none; border-radius: 7px; font-size: var(--font-xs); font-weight: 600; cursor: pointer; font-family: var(--font-family); }
+.btn-add-sm:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @media (max-width: 1024px) {
   .detail-grid { grid-template-columns: 1fr; }

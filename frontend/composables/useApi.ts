@@ -167,6 +167,22 @@ export const useApi = () => {
   const deleteAnnotation = (id: string) =>
     apiFetch<void>(`/annotations/${id}`, { method: 'DELETE' });
 
+  // Reminders
+  const getReminders = () =>
+    apiFetch<any[]>('/reminders');
+
+  const getUpcomingReminders = () =>
+    apiFetch<any[]>('/reminders/upcoming');
+
+  const createReminder = (data: { title: string; remindAt: string; textId?: string; folderId?: string; annotationId?: string; label?: string; sticker?: string; description?: string }) =>
+    apiFetch<any>('/reminders', { method: 'POST', body: data });
+
+  const completeReminder = (id: string) =>
+    apiFetch<any>(`/reminders/${id}/complete`, { method: 'PATCH' });
+
+  const deleteReminder = (id: string) =>
+    apiFetch<void>(`/reminders/${id}`, { method: 'DELETE' });
+
   return {
     apiFetch,
     getCountries,
@@ -196,6 +212,11 @@ export const useApi = () => {
     createAnnotation,
     updateAnnotation,
     deleteAnnotation,
+    getReminders,
+    getUpcomingReminders,
+    createReminder,
+    completeReminder,
+    deleteReminder,
   };
 };
 

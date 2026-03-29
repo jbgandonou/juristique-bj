@@ -25,6 +25,10 @@
           <FolderOpen :size="18" />
           <span>Dossiers</span>
         </NuxtLink>
+        <NuxtLink v-if="isAuthenticated" to="/rappels" class="nav-link">
+          <Clock :size="18" />
+          <span>Rappels</span>
+        </NuxtLink>
       </nav>
 
       <div class="header-right">
@@ -59,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { Search, Globe, BookOpen, LogOut, FolderOpen } from 'lucide-vue-next';
+import { Search, Globe, BookOpen, LogOut, FolderOpen, Clock } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const { user, isAuthenticated, logout } = useAuth();

@@ -6,6 +6,7 @@ import { CreateLegalTextDto } from './dto/create-legal-text.dto';
 import { QueryLegalTextDto } from './dto/query-legal-text.dto';
 import { PaginatedResult } from '../common/dto/pagination.dto';
 import { Theme } from '../themes/entities/theme.entity';
+import { SearchService } from '../search/search.service';
 
 @Injectable()
 export class LegalTextsService {
@@ -14,6 +15,7 @@ export class LegalTextsService {
     private readonly repo: Repository<LegalText>,
     @InjectRepository(Theme)
     private readonly themeRepo: Repository<Theme>,
+    private readonly searchService: SearchService,
   ) {}
 
   async create(dto: CreateLegalTextDto): Promise<LegalText> {
@@ -24,7 +26,31 @@ export class LegalTextsService {
       text.themes = await this.themeRepo.findByIds(themeIds);
     }
 
-    return this.repo.save(text);
+    await this.repo.save(text);
+
+    // After save, re-fetch with relations for indexing
+    const saved = await this.repo.findOne({ where: { id: text.id }, relations: ['country', 'themes'] });
+    if (saved && saved.status === 'published') {
+      await this.searchService.indexDocument({
+        id: saved.id,
+        title: saved.title,
+        reference: saved.reference,
+        contentText: saved.contentText,
+        summary: saved.summary,
+        textType: saved.textType,
+        countryCode: saved.country?.code || '',
+        countryName: saved.country?.name || '',
+        themeSlugs: saved.themes?.map(t => t.slug) || [],
+        themeNames: saved.themes?.map(t => t.name) || [],
+        isInForce: saved.isInForce,
+        isVerified: saved.isVerified,
+        hierarchyRank: saved.hierarchyRank,
+        promulgationDate: saved.promulgationDate,
+        status: saved.status,
+      });
+    }
+
+    return text;
   }
 
   async findAll(query: QueryLegalTextDto): Promise<PaginatedResult<LegalText>> {

@@ -6,10 +6,12 @@ import { TextVersion } from './entities/text-version.entity';
 import { Theme } from '../themes/entities/theme.entity';
 import { LegalTextsService } from './legal-texts.service';
 import { LegalTextsController } from './legal-texts.controller';
+import { SearchModule } from '../search/search.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([LegalText, TextReference, TextVersion, Theme]),
+    SearchModule,
   ],
   controllers: [LegalTextsController],
   providers: [LegalTextsService],

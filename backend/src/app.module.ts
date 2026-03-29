@@ -10,6 +10,7 @@ import { PipelineModule } from './pipeline/pipeline.module';
 import { SeedModule } from './seed/seed.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuthModule } from './auth/auth.module';
     SeedModule,
     UsersModule,
     AuthModule,
+    SearchModule,
   ],
 })
 export class AppModule {}

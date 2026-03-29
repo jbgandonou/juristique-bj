@@ -8,6 +8,8 @@ import { ThemesModule } from './themes/themes.module';
 import { LegalTextsModule } from './legal-texts/legal-texts.module';
 import { PipelineModule } from './pipeline/pipeline.module';
 import { SeedModule } from './seed/seed.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { SeedModule } from './seed/seed.module';
     LegalTextsModule,
     PipelineModule,
     SeedModule,
+    UsersModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

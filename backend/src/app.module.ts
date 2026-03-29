@@ -15,6 +15,8 @@ import { CommentsModule } from './comments/comments.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { MailModule } from './mail/mail.module';
+import { FoldersModule } from './folders/folders.module';
+import { AnnotationsModule } from './annotations/annotations.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { MailModule } from './mail/mail.module';
     CommentsModule,
     AlertsModule,
     BookmarksModule,
+    FoldersModule,
+    AnnotationsModule,
   ],
 })
 export class AppModule {}

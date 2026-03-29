@@ -36,6 +36,12 @@
             <span v-if="folder.shares?.length" class="stat-chip"><Users :size="14" /> {{ folder.shares.length }} partage(s)</span>
             <span v-if="folder.annotations?.length" class="stat-chip"><StickyNote :size="14" /> {{ folder.annotations.length }} annotation(s)</span>
           </div>
+          <div class="folder-header-actions">
+            <button class="btn-new-note hover-lift" @click="createNewNote">
+              <FileEdit :size="18" />
+              Nouvelle note
+            </button>
+          </div>
         </div>
       </header>
 
@@ -335,7 +341,7 @@
 </template>
 
 <script setup lang="ts">
-import { FolderOpen, FileText, Users, Plus, X, Trash2, Share2, Edit3, MessageSquare, StickyNote, Bell, Search } from 'lucide-vue-next';
+import { FolderOpen, FileText, Users, Plus, X, Trash2, Share2, Edit3, MessageSquare, StickyNote, Bell, Search, FileEdit } from 'lucide-vue-next';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -550,6 +556,18 @@ const handleDelete = async () => {
   }
   router.push('/dossiers');
 };
+
+const createNewNote = async () => {
+  try {
+    const note = await authFetch<any>('/editor-notes', {
+      method: 'POST',
+      body: { title: 'Note sans titre', folderId },
+    });
+    router.push(`/notes/${note.id}`);
+  } catch (e) {
+    console.error(e);
+  }
+};
 </script>
 
 <style scoped>
@@ -566,6 +584,9 @@ const handleDelete = async () => {
 .folder-header { overflow: hidden; }
 .folder-color-bar { height: 5px; }
 .folder-header-body { padding: 24px; }
+
+.folder-header-actions { margin-top: 16px; }
+.btn-new-note { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; background: var(--juris-gradient-primary); color: white; border: none; border-radius: 10px; font-size: var(--font-sm); font-weight: 600; cursor: pointer; font-family: var(--font-family); }
 
 .folder-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .folder-name-display { display: flex; align-items: center; gap: 8px; cursor: pointer; }

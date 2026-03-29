@@ -202,6 +202,25 @@ export const useApi = () => {
   const deleteStickyNote = (id: string) =>
     apiFetch<void>(`/sticky-notes/${id}`, { method: 'DELETE' });
 
+  // Editor Notes
+  const getEditorNotes = () =>
+    apiFetch<any[]>('/editor-notes');
+
+  const getEditorNotesByFolder = (folderId: string) =>
+    apiFetch<any[]>(`/editor-notes/by-folder/${folderId}`);
+
+  const getEditorNote = (id: string) =>
+    apiFetch<any>(`/editor-notes/${id}`);
+
+  const createEditorNote = (data: { title: string; folderId?: string; icon?: string }) =>
+    apiFetch<any>('/editor-notes', { method: 'POST', body: data });
+
+  const updateEditorNote = (id: string, data: any) =>
+    apiFetch<any>(`/editor-notes/${id}`, { method: 'PATCH', body: data });
+
+  const deleteEditorNote = (id: string) =>
+    apiFetch<void>(`/editor-notes/${id}`, { method: 'DELETE' });
+
   return {
     apiFetch,
     getCountries,
@@ -242,6 +261,12 @@ export const useApi = () => {
     createStickyNote,
     updateStickyNote,
     deleteStickyNote,
+    getEditorNotes,
+    getEditorNotesByFolder,
+    getEditorNote,
+    createEditorNote,
+    updateEditorNote,
+    deleteEditorNote,
   };
 };
 

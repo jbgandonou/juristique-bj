@@ -111,10 +111,10 @@
           <Divider />
 
           <div class="legal-text-content">
-            <div v-for="article in texte.articles" :key="article.id" class="article-block">
-              <h3 class="article-heading">{{ article.heading }}</h3>
-              <p class="article-body">{{ article.body }}</p>
-            </div>
+            <InlineAnnotations
+              :text-id="route.params.id as string"
+              :content-text="texte.articles.map(a => a.body).join('\n\n')"
+            />
           </div>
         </section>
 

@@ -126,6 +126,47 @@ export const useApi = () => {
       `/legal-texts/compare?themeSlug=${encodeURIComponent(themeSlug)}&countryCodes=${encodeURIComponent(countryCodes.join(','))}`,
     );
 
+  // Folders
+  const getFolders = () =>
+    apiFetch<any[]>('/folders');
+
+  const getFolder = (id: string) =>
+    apiFetch<any>(`/folders/${id}`);
+
+  const createFolder = (data: { name: string; description?: string; color?: string }) =>
+    apiFetch<any>('/folders', { method: 'POST', body: data });
+
+  const updateFolder = (id: string, data: any) =>
+    apiFetch<any>(`/folders/${id}`, { method: 'PATCH', body: data });
+
+  const deleteFolder = (id: string) =>
+    apiFetch<void>(`/folders/${id}`, { method: 'DELETE' });
+
+  const addTextToFolder = (folderId: string, textId: string) =>
+    apiFetch<any>(`/folders/${folderId}/texts`, { method: 'POST', body: { textId } });
+
+  const removeTextFromFolder = (folderId: string, textId: string) =>
+    apiFetch<any>(`/folders/${folderId}/texts/${textId}`, { method: 'DELETE' });
+
+  const shareFolder = (folderId: string, email: string, permission: string) =>
+    apiFetch<any>(`/folders/${folderId}/shares`, { method: 'POST', body: { email, permission } });
+
+  // Annotations
+  const getAnnotations = () =>
+    apiFetch<any[]>('/annotations');
+
+  const getAnnotationsByText = (textId: string) =>
+    apiFetch<any[]>(`/annotations/by-text/${textId}`);
+
+  const createAnnotation = (data: { textId: string; content: string; articleRef?: string; color?: string; folderId?: string }) =>
+    apiFetch<any>('/annotations', { method: 'POST', body: data });
+
+  const updateAnnotation = (id: string, content: string) =>
+    apiFetch<any>(`/annotations/${id}`, { method: 'PATCH', body: { content } });
+
+  const deleteAnnotation = (id: string) =>
+    apiFetch<void>(`/annotations/${id}`, { method: 'DELETE' });
+
   return {
     apiFetch,
     getCountries,
@@ -142,6 +183,19 @@ export const useApi = () => {
     getLegalTextsByStatus,
     updateLegalTextStatus,
     compareLegalTexts,
+    getFolders,
+    getFolder,
+    createFolder,
+    updateFolder,
+    deleteFolder,
+    addTextToFolder,
+    removeTextFromFolder,
+    shareFolder,
+    getAnnotations,
+    getAnnotationsByText,
+    createAnnotation,
+    updateAnnotation,
+    deleteAnnotation,
   };
 };
 

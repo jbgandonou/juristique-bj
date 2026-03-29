@@ -35,6 +35,30 @@
             <Bookmark :size="16" :fill="isFavorited ? 'currentColor' : 'none'" />
             <span>{{ isFavorited ? 'Sauvegardé' : 'Favoris' }}</span>
           </button>
+          <div v-if="isAuthenticated" class="folder-add-wrapper">
+            <button class="action-btn hover-lift" @click="toggleFolderDropdown">
+              <FolderPlus :size="16" />
+              <span>Ajouter au dossier</span>
+            </button>
+            <div v-if="showFolderDropdown" class="folder-dropdown glass-card">
+              <div v-if="foldersLoading" class="folder-dropdown-loading">Chargement...</div>
+              <div v-else-if="!userFolders.length" class="folder-dropdown-empty">
+                <p>Aucun dossier.</p>
+                <NuxtLink to="/dossiers" class="folder-dropdown-link">Créer un dossier</NuxtLink>
+              </div>
+              <template v-else>
+                <button
+                  v-for="folder in userFolders"
+                  :key="folder.id"
+                  class="folder-dropdown-item hover-lift"
+                  @click="addToFolder(folder.id)"
+                >
+                  <span class="folder-dot" :style="{ background: folder.color || 'var(--juris-primary)' }"></span>
+                  {{ folder.name }}
+                </button>
+              </template>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -260,7 +284,7 @@
 import {
   ChevronRight, ShieldCheck, Clock, Download, Copy, Bookmark,
   Calendar, Scale, FileText, AlignLeft, ScrollText, MessageSquare,
-  ThumbsUp, Info, Tag, Link2, ArrowUpRight, XCircle, Quote,
+  ThumbsUp, Info, Tag, Link2, ArrowUpRight, XCircle, Quote, FolderPlus,
 } from 'lucide-vue-next';
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
@@ -269,10 +293,41 @@ import Divider from 'primevue/divider';
 const route = useRoute();
 const { getLegalText, getCommentsByText } = useApi();
 const { setLegalTextSeo } = useSeo();
+const { isAuthenticated, authFetch } = useAuth();
 const loading = ref(true);
 
 const isFavorited = ref(false);
 const newComment = ref('');
+
+// Folder add feature
+const showFolderDropdown = ref(false);
+const userFolders = ref<any[]>([]);
+const foldersLoading = ref(false);
+const folderAddedIds = ref<string[]>([]);
+
+const toggleFolderDropdown = async () => {
+  showFolderDropdown.value = !showFolderDropdown.value;
+  if (showFolderDropdown.value && !userFolders.value.length) {
+    foldersLoading.value = true;
+    try {
+      userFolders.value = await authFetch('/folders');
+    } catch {
+      userFolders.value = [];
+    }
+    foldersLoading.value = false;
+  }
+};
+
+const addToFolder = async (folderId: string) => {
+  const textId = route.params.id as string;
+  try {
+    await authFetch(`/folders/${folderId}/texts`, { method: 'POST', body: { textId } });
+    folderAddedIds.value.push(folderId);
+  } catch {
+    // ignore
+  }
+  showFolderDropdown.value = false;
+};
 
 const submitComment = () => {
   if (!newComment.value.trim()) return;
@@ -1020,5 +1075,61 @@ onMounted(async () => {
 .btn-submit-comment:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Folder Add Dropdown */
+.folder-add-wrapper {
+  position: relative;
+}
+
+.folder-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  z-index: 200;
+  padding: 8px 0;
+}
+
+.folder-dropdown-loading,
+.folder-dropdown-empty {
+  padding: 12px 16px;
+  font-size: var(--font-sm);
+  color: var(--juris-text-secondary);
+}
+
+.folder-dropdown-link {
+  display: block;
+  margin-top: 8px;
+  font-size: var(--font-sm);
+  color: var(--juris-primary-light);
+}
+
+.folder-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  font-size: var(--font-sm);
+  color: var(--juris-text);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-family);
+  transition: background 0.15s ease;
+}
+
+.folder-dropdown-item:hover {
+  background: var(--juris-primary-50);
+  color: var(--juris-primary);
+}
+
+.folder-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 </style>

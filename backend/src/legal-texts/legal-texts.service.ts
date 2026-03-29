@@ -97,4 +97,24 @@ export class LegalTextsService {
     await this.repo.increment({ id }, 'viewCount', 1);
     return text;
   }
+
+  async compareByTheme(themeSlug: string, countryCodes: string[]): Promise<Record<string, LegalText[]>> {
+    const result: Record<string, LegalText[]> = {};
+
+    for (const code of countryCodes) {
+      const qb = this.repo
+        .createQueryBuilder('text')
+        .leftJoinAndSelect('text.country', 'country')
+        .leftJoinAndSelect('text.themes', 'theme')
+        .where('country.code = :code', { code: code.trim().toUpperCase() })
+        .andWhere('theme.slug = :themeSlug', { themeSlug })
+        .andWhere('text.status = :status', { status: 'published' })
+        .orderBy('text.promulgationDate', 'DESC')
+        .take(5);
+
+      result[code.trim().toUpperCase()] = await qb.getMany();
+    }
+
+    return result;
+  }
 }

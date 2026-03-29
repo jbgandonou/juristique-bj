@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, Query, Res } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { LegalTextsService } from './legal-texts.service';
 import { CreateLegalTextDto } from './dto/create-legal-text.dto';
@@ -24,6 +24,17 @@ export class LegalTextsController {
   @ApiOperation({ summary: 'List legal texts with filters' })
   findAll(@Query() query: QueryLegalTextDto) {
     return this.service.findAll(query);
+  }
+
+  @Get('compare')
+  @ApiOperation({ summary: 'Compare legal texts from different countries on the same theme' })
+  @ApiQuery({ name: 'themeSlug', required: true })
+  @ApiQuery({ name: 'countryCodes', required: true, description: 'Comma-separated country codes' })
+  async compare(
+    @Query('themeSlug') themeSlug: string,
+    @Query('countryCodes') countryCodes: string,
+  ) {
+    return this.service.compareByTheme(themeSlug, countryCodes.split(','));
   }
 
   @Get(':id')

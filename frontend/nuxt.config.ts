@@ -2,6 +2,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
 
+  modules: [],
+
+  css: ['~/assets/css/style.css'],
+
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:4000',
@@ -20,6 +24,12 @@ export default defineNuxtConfig({
         },
       ],
       htmlAttrs: { lang: 'fr' },
+      link: [
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+        },
+      ],
     },
   },
 

@@ -1,0 +1,592 @@
+/* ================================================
+   JURISTIQUE.BJ — Design System
+   Adapted for a legal platform (francophone Africa)
+   ================================================ */
+
+/* === CSS Variables === */
+:root {
+  /* Primary (Indigo juridique) */
+  --juris-primary: #1A237E;
+  --juris-primary-light: #3949AB;
+  --juris-primary-lighter: #7986CB;
+  --juris-primary-50: rgba(26, 35, 126, 0.05);
+  --juris-primary-100: rgba(26, 35, 126, 0.1);
+  --juris-primary-dark: #0D1642;
+
+  /* Secondary (Or / Doré — autorité, prestige) */
+  --juris-secondary: #C6942A;
+  --juris-secondary-light: #E6B84D;
+  --juris-secondary-dark: #9A7420;
+
+  /* Accent (Teal — modernité) */
+  --juris-accent: #00897B;
+  --juris-accent-light: #4DB6AC;
+
+  /* Semantic */
+  --juris-success: #2E7D32;
+  --juris-warning: #F9A825;
+  --juris-danger: #C62828;
+  --juris-info: #1565C0;
+
+  /* Surfaces */
+  --juris-bg: #F4F5F9;
+  --juris-surface: #FFFFFF;
+  --juris-surface-hover: #F8F9FC;
+
+  /* Text */
+  --juris-text: #1A1D2E;
+  --juris-text-secondary: #5F6477;
+  --juris-text-muted: #9CA3AF;
+
+  /* Borders */
+  --juris-border: #E2E5EF;
+  --juris-border-light: #F0F1F6;
+
+  /* Gradients */
+  --juris-gradient-primary: linear-gradient(135deg, var(--juris-primary-dark), var(--juris-primary-light));
+  --juris-gradient-sidebar: linear-gradient(180deg, var(--juris-primary-dark) 0%, var(--juris-primary) 100%);
+  --juris-gradient-accent: linear-gradient(135deg, var(--juris-primary), var(--juris-accent));
+  --juris-gradient-gold: linear-gradient(135deg, var(--juris-secondary-dark), var(--juris-secondary-light));
+
+  /* Typography */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-base: 1rem;
+  --font-lg: 1.125rem;
+  --font-xl: 1.25rem;
+  --font-2xl: 1.5rem;
+  --font-3xl: 1.875rem;
+  --font-4xl: 2.25rem;
+
+  /* Spacing */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 72px;
+  --header-height: 64px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(26, 35, 126, 0.06);
+  --shadow-md: 0 4px 12px rgba(26, 35, 126, 0.08);
+  --shadow-lg: 0 8px 24px rgba(26, 35, 126, 0.12);
+  --shadow-xl: 0 16px 48px rgba(26, 35, 126, 0.16);
+  --shadow-glow-primary: 0 0 20px rgba(26, 35, 126, 0.25);
+  --shadow-glow-gold: 0 0 20px rgba(198, 148, 42, 0.3);
+}
+
+/* === Base Reset === */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-family);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--juris-bg);
+  color: var(--juris-text);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--juris-primary-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--juris-primary);
+}
+
+/* === Utility Classes === */
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--juris-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-gold {
+  background: var(--juris-gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* Card Hover */
+.card-hover {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Hover Lift */
+.hover-lift {
+  transition: all 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-badge.verified {
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--juris-success);
+}
+
+.status-badge.verified::before {
+  background: var(--juris-success);
+}
+
+.status-badge.pending {
+  background: rgba(249, 168, 37, 0.1);
+  color: var(--juris-warning);
+}
+
+.status-badge.pending::before {
+  background: var(--juris-warning);
+}
+
+.status-badge.in-force {
+  background: rgba(26, 35, 126, 0.08);
+  color: var(--juris-primary);
+}
+
+.status-badge.in-force::before {
+  background: var(--juris-primary);
+}
+
+.status-badge.abrogated {
+  background: rgba(198, 40, 40, 0.08);
+  color: var(--juris-danger);
+}
+
+.status-badge.abrogated::before {
+  background: var(--juris-danger);
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, var(--juris-border-light) 25%, var(--juris-border) 50%, var(--juris-border-light) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Animations */
+.fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger animations */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+
+/* === PrimeVue Overrides === */
+
+/* DataTable */
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--juris-surface);
+  color: var(--juris-text-secondary);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--juris-border);
+  padding: 12px 16px;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--juris-primary-50);
+}
+
+.p-datatable .p-paginator {
+  border: none;
+  padding: 12px 0;
+}
+
+/* Inputs */
+.p-inputtext {
+  border-radius: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--juris-border);
+  transition: all 0.2s ease;
+  font-size: var(--font-sm);
+}
+
+.p-inputtext:focus {
+  border-color: var(--juris-primary-lighter);
+  box-shadow: 0 0 0 3px var(--juris-primary-100);
+}
+
+/* Buttons */
+.p-button {
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: var(--font-sm);
+  padding: 10px 20px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.p-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.p-button.p-button-primary {
+  background: var(--juris-gradient-primary);
+  border: none;
+}
+
+/* Dialog */
+.p-dialog {
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+}
+
+.p-dialog-mask {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Toast */
+.p-toast .p-toast-message {
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Dropdown */
+.p-select {
+  border-radius: 10px;
+}
+
+.p-select-panel {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Tag */
+.p-tag {
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+/* === Hierarchy Rank Indicators === */
+.hierarchy-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: white;
+}
+
+.hierarchy-rank.rank-1 { background: var(--juris-gradient-gold); }
+.hierarchy-rank.rank-2 { background: var(--juris-primary); }
+.hierarchy-rank.rank-3 { background: var(--juris-primary-light); }
+.hierarchy-rank.rank-4 { background: var(--juris-accent); }
+.hierarchy-rank.rank-5 { background: var(--juris-text-secondary); }
+.hierarchy-rank.rank-6 { background: var(--juris-text-muted); }
+
+/* === Country Flag === */
+.country-flag {
+  width: 24px;
+  height: 18px;
+  border-radius: 3px;
+  object-fit: cover;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* === Theme Icon Card === */
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: var(--juris-surface);
+  border: 1px solid var(--juris-border-light);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-card:hover {
+  border-color: var(--juris-primary-lighter);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-card .theme-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background: var(--juris-primary-50);
+  color: var(--juris-primary);
+}
+
+.theme-card .theme-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--juris-text);
+  text-align: center;
+}
+
+.theme-card .theme-count {
+  font-size: var(--font-xs);
+  color: var(--juris-text-muted);
+}
+
+/* === Search Hero === */
+.search-hero {
+  background: var(--juris-gradient-primary);
+  border-radius: var(--radius-xl);
+  padding: 48px 32px;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.search-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent);
+  pointer-events: none;
+}
+
+.search-hero h1 {
+  font-size: var(--font-3xl);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.search-hero p {
+  font-size: var(--font-lg);
+  opacity: 0.85;
+  margin-bottom: 24px;
+}
+
+.search-hero .search-input-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.search-hero .search-input-wrapper input {
+  width: 100%;
+  padding: 16px 20px 16px 48px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: white;
+  font-size: var(--font-lg);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-hero .search-input-wrapper input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.search-hero .search-input-wrapper input:focus {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.search-hero .search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* === Stats Bar === */
+.stats-bar {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.stats-bar .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--font-sm);
+}
+
+.stats-bar .stat-value {
+  font-weight: 700;
+  color: white;
+}
+
+/* === Legal Text Card === */
+.legal-text-card {
+  background: var(--juris-surface);
+  border: 1px solid var(--juris-border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.legal-text-card:hover {
+  border-color: var(--juris-primary-lighter);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.legal-text-card .card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.legal-text-card .card-title {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--juris-text);
+  line-height: 1.4;
+}
+
+.legal-text-card .card-title:hover {
+  color: var(--juris-primary);
+}
+
+.legal-text-card .card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  font-size: var(--font-xs);
+  color: var(--juris-text-secondary);
+}
+
+.legal-text-card .card-meta .meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legal-text-card .card-themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .search-hero {
+    padding: 32px 20px;
+  }
+
+  .search-hero h1 {
+    font-size: var(--font-2xl);
+  }
+
+  .stats-bar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .theme-card {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-hero .search-input-wrapper input {
+    font-size: var(--font-base);
+    padding: 14px 16px 14px 44px;
+  }
+}

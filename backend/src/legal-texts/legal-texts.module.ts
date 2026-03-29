@@ -6,6 +6,7 @@ import { TextVersion } from './entities/text-version.entity';
 import { Theme } from '../themes/entities/theme.entity';
 import { LegalTextsService } from './legal-texts.service';
 import { LegalTextsController } from './legal-texts.controller';
+import { ExportService } from './export.service';
 import { SearchModule } from '../search/search.module';
 
 @Module({
@@ -14,7 +15,7 @@ import { SearchModule } from '../search/search.module';
     SearchModule,
   ],
   controllers: [LegalTextsController],
-  providers: [LegalTextsService],
+  providers: [LegalTextsService, ExportService],
   exports: [LegalTextsService],
 })
 export class LegalTextsModule {}

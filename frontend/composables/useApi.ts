@@ -120,6 +120,12 @@ export const useApi = () => {
       body: { status },
     });
 
+  // Comparative law
+  const compareLegalTexts = (themeSlug: string, countryCodes: string[]) =>
+    apiFetch<Record<string, LegalText[]>>(
+      `/legal-texts/compare?themeSlug=${encodeURIComponent(themeSlug)}&countryCodes=${encodeURIComponent(countryCodes.join(','))}`,
+    );
+
   return {
     apiFetch,
     getCountries,
@@ -135,6 +141,7 @@ export const useApi = () => {
     getPipelineSources,
     getLegalTextsByStatus,
     updateLegalTextStatus,
+    compareLegalTexts,
   };
 };
 

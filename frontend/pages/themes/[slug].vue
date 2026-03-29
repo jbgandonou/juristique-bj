@@ -183,8 +183,8 @@ const themeMap: Record<string, ThemeData> = {
   // Droit public
   'constitution': { name: 'Constitution', description: 'Textes fondamentaux organisant les institutions et les droits fondamentaux', icon: ScrollText, textCount: 26 },
   'droit-administratif': { name: 'Droit administratif', description: "Organisation et fonctionnement de l'administration publique", icon: Building2, textCount: 43 },
-  'droit-constitutionnel': { name: 'Droit constitutionnel', description: 'Normes régissant l'organisation et l'exercice du pouvoir politique', icon: Scale, textCount: 18 },
-  'droit-penal': { name: 'Droit pénal', description: 'Infractions, sanctions et protection de l'ordre social', icon: Gavel, textCount: 28 },
+  'droit-constitutionnel': { name: 'Droit constitutionnel', description: "Normes régissant l'organisation et l'exercice du pouvoir politique", icon: Scale, textCount: 18 },
+  'droit-penal': { name: 'Droit pénal', description: "Infractions, sanctions et protection de l'ordre social", icon: Gavel, textCount: 28 },
   'procedure-penale': { name: 'Procédure pénale', description: 'Règles gouvernant les poursuites judiciaires en matière pénale', icon: Scale, textCount: 21 },
   'droit-fiscal': { name: 'Droit fiscal', description: 'Règles régissant les impôts, taxes et contributions', icon: Receipt, textCount: 57 },
   'droit-douanier': { name: 'Droit douanier', description: 'Réglementation des importations, exportations et droits de douane', icon: Truck, textCount: 32 },
@@ -210,7 +210,7 @@ const themeMap: Record<string, ThemeData> = {
   'droit-personnes': { name: 'Droit des personnes', description: 'Capacité juridique, état civil et droits individuels', icon: Users, textCount: 14 },
   'sante-publique': { name: 'Santé publique', description: 'Organisation du système de santé et politiques sanitaires', icon: Stethoscope, textCount: 48 },
   'education': { name: 'Éducation', description: "Système éducatif, établissements d'enseignement et politiques scolaires", icon: GraduationCap, textCount: 35 },
-  'logement-urbanisme': { name: 'Logement & Urbanisme', description: 'Règles relatives à la construction, au logement et à l'aménagement urbain', icon: Home, textCount: 26 },
+  'logement-urbanisme': { name: 'Logement & Urbanisme', description: "Règles relatives à la construction, au logement et à l'aménagement urbain", icon: Home, textCount: 26 },
 
   // Numérique & Tech
   'numerique-telecoms': { name: 'Numérique & Télécoms', description: 'Régulation des communications électroniques et du secteur numérique', icon: Wifi, textCount: 52 },
@@ -219,8 +219,8 @@ const themeMap: Record<string, ThemeData> = {
   'commerce-electronique': { name: 'Commerce électronique', description: 'Transactions en ligne, paiements mobiles et contrats électroniques', icon: Phone, textCount: 23 },
 
   // Environnement
-  'environnement': { name: 'Environnement', description: 'Protection de l'environnement, évaluation environnementale et normes', icon: Leaf, textCount: 67 },
-  'energie-electrique': { name: 'Énergie électrique', description: 'Production, transport et distribution de l'électricité', icon: Bolt, textCount: 38 },
+  'environnement': { name: 'Environnement', description: "Protection de l'environnement, évaluation environnementale et normes", icon: Leaf, textCount: 67 },
+  'energie-electrique': { name: 'Énergie électrique', description: "Production, transport et distribution de l'électricité", icon: Bolt, textCount: 38 },
   'energie-renouvelable': { name: 'Énergie renouvelable', description: 'Développement et promotion des énergies solaire, éolienne et hydraulique', icon: Sun, textCount: 21 },
   'gestion-dechets': { name: 'Gestion des déchets', description: 'Collecte, traitement et valorisation des déchets', icon: TreePine, textCount: 15 },
   'ressources-eau': { name: 'Ressources en eau', description: 'Gestion, accès et protection des ressources hydriques', icon: Droplets, textCount: 29 },

@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import databaseConfig from './config/database.config';
+import { CountriesModule } from './countries/countries.module';
+import { ThemesModule } from './themes/themes.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import databaseConfig from './config/database.config';
       useFactory: (config: ConfigService) => config.get('database')!,
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    CountriesModule,
+    ThemesModule,
   ],
 })
 export class AppModule {}

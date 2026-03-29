@@ -5,6 +5,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import databaseConfig from './config/database.config';
 import { CountriesModule } from './countries/countries.module';
 import { ThemesModule } from './themes/themes.module';
+import { LegalTextsModule } from './legal-texts/legal-texts.module';
+import { PipelineModule } from './pipeline/pipeline.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { ThemesModule } from './themes/themes.module';
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     CountriesModule,
     ThemesModule,
+    LegalTextsModule,
+    PipelineModule,
   ],
 })
 export class AppModule {}

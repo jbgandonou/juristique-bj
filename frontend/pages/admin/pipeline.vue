@@ -126,7 +126,7 @@
         <Column header="Actions" style="min-width: 100px;">
           <template #body="{ data }">
             <div class="job-actions">
-              <button class="action-btn view" title="Voir les logs">
+              <button class="action-btn view" title="Voir les details" @click="openJobDetail(data)">
                 <Terminal :size="14" />
               </button>
               <button
@@ -149,6 +149,43 @@
         </Column>
       </DataTable>
     </div>
+
+    <!-- Job Detail Dialog -->
+    <Dialog
+      v-model:visible="showJobDetail"
+      :header="`Job #${selectedJob?.id} — ${selectedJob?.source}`"
+      :modal="true"
+      :style="{ width: '600px' }"
+    >
+      <div v-if="selectedJob" class="job-detail">
+        <div class="job-detail-row">
+          <span class="job-detail-label">Statut</span>
+          <span class="job-status-badge" :class="`job-${selectedJob.status}`">
+            {{ statusLabel(selectedJob.status) }}
+          </span>
+        </div>
+        <div class="job-detail-row">
+          <span class="job-detail-label">Source</span>
+          <span>{{ selectedJob.source }}</span>
+        </div>
+        <div class="job-detail-row">
+          <span class="job-detail-label">Demarre</span>
+          <span>{{ selectedJob.started }}</span>
+        </div>
+        <div class="job-detail-row">
+          <span class="job-detail-label">Duree</span>
+          <span>{{ selectedJob.duration || '—' }}</span>
+        </div>
+        <div class="job-detail-row">
+          <span class="job-detail-label">Textes collectes</span>
+          <span class="count-chip">{{ selectedJob.textes }}</span>
+        </div>
+        <div v-if="selectedJob.errorMessage" class="job-error-block">
+          <span class="job-detail-label">Erreur</span>
+          <pre class="job-error-message">{{ selectedJob.errorMessage }}</pre>
+        </div>
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -160,12 +197,15 @@ import {
 } from 'lucide-vue-next';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import Dialog from 'primevue/dialog';
 
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
 const { getPipelineJobs, getPipelineSources } = useApi();
 
 const loading = ref(true);
+const showJobDetail = ref(false);
+const selectedJob = ref<any>(null);
 
 // Real sources configured in the pipeline
 const defaultSources = [
@@ -207,6 +247,7 @@ onMounted(async () => {
         duration: j.durationMs != null ? `${Math.round(j.durationMs / 1000)}s` : j.duration ?? null,
         textes: j.textsCount ?? j.textes ?? 0,
         progress: j.progress ?? 0,
+        errorMessage: j.errorMessage ?? null,
       }));
     }
   } catch (e) {
@@ -253,6 +294,11 @@ const runAll = () => {
 
 const triggerSource = (src: any) => {
   console.log('Triggering', src.name);
+};
+
+const openJobDetail = (job: any) => {
+  selectedJob.value = job;
+  showJobDetail.value = true;
 };
 
 const retryJob = (job: any) => {
@@ -598,6 +644,49 @@ const retryJob = (job: any) => {
 
 .action-btn.cancel:hover {
   background: rgba(198, 40, 40, 0.14);
+}
+
+/* Job Detail Dialog */
+.job-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.job-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--juris-border-light);
+}
+
+.job-detail-label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--juris-text-secondary);
+}
+
+.job-error-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.job-error-message {
+  background: rgba(198, 40, 40, 0.06);
+  border: 1px solid rgba(198, 40, 40, 0.15);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: var(--font-xs);
+  color: var(--juris-danger);
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
 }
 
 /* Responsive */

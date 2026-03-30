@@ -1,3 +1,7 @@
 {
-  "version": 2
+  "version": 2,
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/.output",
+  "framework": "nuxtjs",
+  "installCommand": "cd frontend && npm install"
 }

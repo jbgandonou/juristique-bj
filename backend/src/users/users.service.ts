@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -83,6 +83,10 @@ export class UsersService {
       resetTokenExpires: expires,
     });
     return { token, user };
+  }
+
+  async promoteToAdmin(userId: string): Promise<void> {
+    await this.repo.update(userId, { role: UserRole.ADMIN, isVerified: true });
   }
 
   async resetPassword(token: string, newPassword: string): Promise<User> {

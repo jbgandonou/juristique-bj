@@ -7,9 +7,10 @@
         <p class="page-subtitle">Supervision des sources et des jobs de scraping</p>
       </div>
       <div class="page-header-actions">
-        <button class="btn-run-all" @click="runAll">
-          <Play :size="15" />
-          Lancer tous les jobs
+        <button class="btn-run-all" :disabled="runningAll" @click="runAll">
+          <Loader v-if="runningAll" :size="15" class="spin" />
+          <Play v-else :size="15" />
+          {{ runningAll ? 'Lancement...' : 'Lancer tous les jobs' }}
         </button>
       </div>
     </div>
@@ -201,7 +202,7 @@ import Dialog from 'primevue/dialog';
 
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
-const { getPipelineJobs, getPipelineSources } = useApi();
+const { getPipelineJobs, getPipelineSources, createPipelineJob } = useApi();
 
 const loading = ref(true);
 const showJobDetail = ref(false);
@@ -288,12 +289,49 @@ const statusIcon = (s: string) => ({
   failed: AlertTriangle,
 }[s] ?? Circle);
 
-const runAll = () => {
-  console.log('Running all jobs...');
+const runningAll = ref(false);
+
+const runAll = async () => {
+  runningAll.value = true;
+  try {
+    for (const src of sources.value) {
+      if (src.active) {
+        const job = await createPipelineJob(src.name);
+        jobs.value.unshift({
+          id: job.id,
+          source: job.sourceName ?? src.name,
+          status: job.status ?? 'queued',
+          started: new Date().toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          duration: null,
+          textes: 0,
+          progress: 0,
+          errorMessage: null,
+        });
+      }
+    }
+  } catch (e) {
+    console.error('Failed to run all jobs', e);
+  } finally {
+    runningAll.value = false;
+  }
 };
 
-const triggerSource = (src: any) => {
-  console.log('Triggering', src.name);
+const triggerSource = async (src: any) => {
+  try {
+    const job = await createPipelineJob(src.name);
+    jobs.value.unshift({
+      id: job.id,
+      source: job.sourceName ?? src.name,
+      status: job.status ?? 'queued',
+      started: new Date().toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      duration: null,
+      textes: 0,
+      progress: 0,
+      errorMessage: null,
+    });
+  } catch (e) {
+    console.error('Failed to trigger source', src.name, e);
+  }
 };
 
 const openJobDetail = (job: any) => {
@@ -301,9 +339,22 @@ const openJobDetail = (job: any) => {
   showJobDetail.value = true;
 };
 
-const retryJob = (job: any) => {
-  const idx = jobs.value.findIndex((j) => j.id === job.id);
-  if (idx !== -1) jobs.value[idx].status = 'queued';
+const retryJob = async (job: any) => {
+  try {
+    const newJob = await createPipelineJob(job.source);
+    jobs.value.unshift({
+      id: newJob.id,
+      source: newJob.sourceName ?? job.source,
+      status: newJob.status ?? 'queued',
+      started: new Date().toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      duration: null,
+      textes: 0,
+      progress: 0,
+      errorMessage: null,
+    });
+  } catch (e) {
+    console.error('Failed to retry job', job.id, e);
+  }
 };
 </script>
 

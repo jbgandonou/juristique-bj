@@ -105,6 +105,10 @@ export const useApi = () => {
   const getPipelineJobs = (page = 1, limit = 20) =>
     apiFetch<PaginatedResult<any>>(`/pipeline/jobs?page=${page}&limit=${limit}`);
 
+  // Create a pipeline job
+  const createPipelineJob = (sourceName: string, sourceUrl?: string) =>
+    apiFetch<any>('/pipeline/jobs', { method: 'POST', body: { sourceName, sourceUrl } });
+
   // Pipeline sources
   const getPipelineSources = () =>
     apiFetch<any[]>('/pipeline/sources');
@@ -262,6 +266,7 @@ export const useApi = () => {
     searchTexts,
     getCommentsByText,
     getPipelineJobs,
+    createPipelineJob,
     getPipelineSources,
     getLegalTextsByStatus,
     updateLegalTextStatus,

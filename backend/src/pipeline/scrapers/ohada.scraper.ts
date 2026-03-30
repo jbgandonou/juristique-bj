@@ -7,6 +7,20 @@ import { TextType } from '../../legal-texts/entities/legal-text.entity';
 const BASE_URL = 'https://www.ohada.org';
 const ACTES_URL = `${BASE_URL}/actes-uniformes/`;
 
+// Known Actes Uniformes URLs (the site only links a few, but these all exist)
+const KNOWN_ACTES: { title: string; url: string }[] = [
+  { title: 'Acte Uniforme relatif au Droit Commercial Général', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-commercial-general/` },
+  { title: 'Acte Uniforme relatif au Droit des Sociétés Commerciales et du GIE', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-des-societes-commerciales-et-du-gie/` },
+  { title: 'Acte Uniforme portant organisation des Sûretés', url: `${BASE_URL}/acte-uniforme-portant-organisation-des-suretes/` },
+  { title: 'Acte Uniforme portant organisation des Procédures Simplifiées de Recouvrement et des Voies d\'Exécution', url: `${BASE_URL}/acte-uniforme-portant-organisation-des-procedures-simplifiees-de-recouvrement-et-des-voies-dexecution/` },
+  { title: 'Acte Uniforme portant organisation des Procédures Collectives d\'Apurement du Passif', url: `${BASE_URL}/acte-uniforme-portant-organisation-des-procedures-collectives-dapurement-du-passif/` },
+  { title: 'Acte Uniforme relatif au Droit de l\'Arbitrage', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-de-larbitrage/` },
+  { title: 'Acte Uniforme relatif au Droit Comptable et à l\'Information Financière', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-comptable-et-a-linformation-financiere-audcif/` },
+  { title: 'Acte Uniforme relatif au contrat de Transport de Marchandises par Route', url: `${BASE_URL}/acte-uniforme-relatif-au-contrat-de-transport-de-marchandises-par-route/` },
+  { title: 'Acte Uniforme relatif au Droit des Sociétés Coopératives', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-des-societes-cooperatives/` },
+  { title: 'Acte Uniforme relatif à la Médiation', url: `${BASE_URL}/acte-uniforme-relatif-a-la-mediation/` },
+];
+
 // 17 OHADA member state codes
 const OHADA_MEMBERS = [
   'BJ', 'BF', 'CM', 'CF', 'TD', 'KM', 'CG', 'CD',
@@ -26,15 +40,16 @@ export class OhadaScraper implements Scraper {
       const { data: html } = await axios.get(ACTES_URL, { timeout: 30000 });
       const $ = cheerio.load(html);
 
-      // Find links to individual Actes Uniformes
-      const links: { title: string; url: string }[] = [];
+      // Start with known actes, then add any discovered from the page
+      const links: { title: string; url: string }[] = [...KNOWN_ACTES];
 
       $('a').each((_, el) => {
         const href = $(el).attr('href') || '';
         const text = $(el).text().trim();
         if (
           text.length > 10 &&
-          (href.includes('acte-uniforme') || text.toLowerCase().includes('acte uniforme'))
+          href.includes('acte-uniforme') &&
+          !href.endsWith('/actes-uniformes/')
         ) {
           const url = href.startsWith('http') ? href : `${BASE_URL}${href}`;
           if (!links.find((l) => l.url === url)) {
@@ -43,7 +58,7 @@ export class OhadaScraper implements Scraper {
         }
       });
 
-      this.logger.log(`Found ${links.length} Actes Uniformes links`);
+      this.logger.log(`Total ${links.length} Actes Uniformes to scrape`);
 
       for (const link of links) {
         try {

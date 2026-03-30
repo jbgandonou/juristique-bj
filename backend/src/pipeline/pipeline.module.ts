@@ -22,12 +22,22 @@ import { OhadaScraper } from './scrapers/ohada.scraper';
       useFactory: (config: ConfigService) => {
         const redisUrl = config.get<string>('REDIS_URL');
         if (redisUrl) {
-          return { connection: { url: redisUrl } };
+          const parsed = new URL(redisUrl);
+          return {
+            connection: {
+              host: parsed.hostname,
+              port: parseInt(parsed.port, 10) || 6379,
+              password: parsed.password || undefined,
+              tls: parsed.protocol === 'rediss:' ? {} : undefined,
+              maxRetriesPerRequest: null,
+            },
+          };
         }
         return {
           connection: {
             host: config.get<string>('REDIS_HOST', 'localhost'),
             port: config.get<number>('REDIS_PORT', 6379),
+            maxRetriesPerRequest: null,
           },
         };
       },

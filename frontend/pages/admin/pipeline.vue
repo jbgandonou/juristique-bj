@@ -291,26 +291,35 @@ const statusIcon = (s: string) => ({
 
 const runningAll = ref(false);
 
+const addJobToList = (job: any, sourceName: string) => {
+  jobs.value.unshift({
+    id: job.id,
+    source: job.sourceName ?? sourceName,
+    status: job.status ?? 'queued',
+    started: new Date().toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    duration: null,
+    textes: 0,
+    progress: 0,
+    errorMessage: null,
+  });
+};
+
 const runAll = async () => {
   runningAll.value = true;
   try {
-    for (const src of sources.value) {
-      if (src.active) {
-        const job = await createPipelineJob(src.name);
-        jobs.value.unshift({
-          id: job.id,
-          source: job.sourceName ?? src.name,
-          status: job.status ?? 'queued',
-          started: new Date().toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-          duration: null,
-          textes: 0,
-          progress: 0,
-          errorMessage: null,
-        });
+    const activeSources = sources.value.filter((s) => s.active);
+    const results = await Promise.allSettled(
+      activeSources.map((src) => createPipelineJob(src.name)),
+    );
+    results.forEach((result, i) => {
+      if (result.status === 'fulfilled') {
+        addJobToList(result.value, activeSources[i].name);
+      } else {
+        alert(`Erreur pour ${activeSources[i].name}: ${result.reason?.message || result.reason}`);
       }
-    }
-  } catch (e) {
-    console.error('Failed to run all jobs', e);
+    });
+  } catch (e: any) {
+    alert('Erreur lors du lancement des jobs: ' + (e?.message || e));
   } finally {
     runningAll.value = false;
   }
@@ -319,18 +328,9 @@ const runAll = async () => {
 const triggerSource = async (src: any) => {
   try {
     const job = await createPipelineJob(src.name);
-    jobs.value.unshift({
-      id: job.id,
-      source: job.sourceName ?? src.name,
-      status: job.status ?? 'queued',
-      started: new Date().toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-      duration: null,
-      textes: 0,
-      progress: 0,
-      errorMessage: null,
-    });
-  } catch (e) {
-    console.error('Failed to trigger source', src.name, e);
+    addJobToList(job, src.name);
+  } catch (e: any) {
+    alert(`Erreur pour ${src.name}: ${e?.message || e}`);
   }
 };
 
@@ -342,18 +342,9 @@ const openJobDetail = (job: any) => {
 const retryJob = async (job: any) => {
   try {
     const newJob = await createPipelineJob(job.source);
-    jobs.value.unshift({
-      id: newJob.id,
-      source: newJob.sourceName ?? job.source,
-      status: newJob.status ?? 'queued',
-      started: new Date().toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-      duration: null,
-      textes: 0,
-      progress: 0,
-      errorMessage: null,
-    });
-  } catch (e) {
-    console.error('Failed to retry job', job.id, e);
+    addJobToList(newJob, job.source);
+  } catch (e: any) {
+    alert(`Erreur relance job #${job.id}: ${e?.message || e}`);
   }
 };
 </script>

@@ -167,110 +167,15 @@ const { getPipelineJobs, getPipelineSources } = useApi();
 
 const loading = ref(true);
 
-const mockSources = [
-  {
-    name: 'FAOLEX',
-    active: true,
-    lastRun: '29 mars 2026, 10:14',
-    successRate: '96%',
-    nextRun: 'Dans 2h',
-  },
-  {
-    name: 'OHADA',
-    active: true,
-    lastRun: '28 mars 2026, 18:00',
-    successRate: '99%',
-    nextRun: 'Demain 08:00',
-  },
-  {
-    name: 'Primature SN',
-    active: true,
-    lastRun: '29 mars 2026, 08:30',
-    successRate: '88%',
-    nextRun: 'Dans 6h',
-  },
-  {
-    name: 'République TG',
-    active: false,
-    lastRun: '21 mars 2026, 14:00',
-    successRate: '72%',
-    nextRun: 'Désactivé',
-  },
-  {
-    name: 'Assemblée CI',
-    active: true,
-    lastRun: '29 mars 2026, 12:00',
-    successRate: '91%',
-    nextRun: 'Dans 4h',
-  },
-  {
-    name: 'JO Bénin',
-    active: true,
-    lastRun: '27 mars 2026, 09:45',
-    successRate: '83%',
-    nextRun: 'Demain 06:00',
-  },
+// Real sources configured in the pipeline
+const defaultSources = [
+  { name: 'FAOLEX', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
+  { name: 'OHADA', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
+  { name: 'Constitute Project', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
 ];
 
-const mockJobs = [
-  {
-    id: 1042,
-    source: 'FAOLEX',
-    status: 'enriching',
-    started: '29 mars 2026, 10:14',
-    duration: '18m',
-    textes: 23,
-    progress: 74,
-  },
-  {
-    id: 1041,
-    source: 'Primature SN',
-    status: 'scraping',
-    started: '29 mars 2026, 08:30',
-    duration: '42m',
-    textes: 12,
-    progress: 55,
-  },
-  {
-    id: 1040,
-    source: 'Assemblée CI',
-    status: 'queued',
-    started: '29 mars 2026, 12:00',
-    duration: null,
-    textes: 0,
-    progress: 0,
-  },
-  {
-    id: 1039,
-    source: 'OHADA',
-    status: 'completed',
-    started: '28 mars 2026, 18:00',
-    duration: '7m 22s',
-    textes: 8,
-    progress: 100,
-  },
-  {
-    id: 1038,
-    source: 'JO Bénin',
-    status: 'failed',
-    started: '27 mars 2026, 09:45',
-    duration: '3m 10s',
-    textes: 0,
-    progress: 0,
-  },
-  {
-    id: 1037,
-    source: 'République TG',
-    status: 'completed',
-    started: '21 mars 2026, 14:00',
-    duration: '12m 45s',
-    textes: 6,
-    progress: 100,
-  },
-];
-
-const sources = ref<any[]>([...mockSources]);
-const jobs = ref<any[]>([...mockJobs]);
+const sources = ref<any[]>([...defaultSources]);
+const jobs = ref<any[]>([]);
 
 onMounted(async () => {
   try {
@@ -305,7 +210,7 @@ onMounted(async () => {
       }));
     }
   } catch (e) {
-    console.log('Pipeline API not available, using mock data');
+    console.log('Pipeline API not available');
   } finally {
     loading.value = false;
   }

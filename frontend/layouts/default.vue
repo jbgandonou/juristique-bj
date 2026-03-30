@@ -4,7 +4,7 @@
     <header class="app-header glass-card">
       <div class="header-left">
         <NuxtLink to="/" class="logo">
-          <span class="gradient-text logo-text">Juristique.bj</span>
+          <span class="gradient-text logo-text">Jus Africa</span>
         </NuxtLink>
       </div>
 
@@ -55,7 +55,7 @@
     <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-content">
-        <p>&copy; 2026 Juristique.bj — Droit africain francophone</p>
+        <p>&copy; 2026 Jus Africa — Droit africain francophone</p>
         <p class="footer-stats">26 pays · 42 thèmes · Textes juridiques vérifiés</p>
       </div>
     </footer>

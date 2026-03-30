@@ -6,7 +6,7 @@
       <XCircle v-else :size="48" class="verify-icon error" />
 
       <h1>{{ loading ? 'Vérification en cours...' : success ? 'E-mail vérifié !' : 'Erreur de vérification' }}</h1>
-      <p v-if="success">Votre adresse e-mail a été vérifiée avec succès. Vous pouvez maintenant profiter pleinement de Juristique.bj.</p>
+      <p v-if="success">Votre adresse e-mail a été vérifiée avec succès. Vous pouvez maintenant profiter pleinement de Jus Africa.</p>
       <p v-else-if="!loading">{{ errorMsg }}</p>
 
       <NuxtLink v-if="!loading" :to="success ? '/profil' : '/connexion'" class="btn-primary">

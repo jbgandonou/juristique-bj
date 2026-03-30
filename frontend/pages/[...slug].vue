@@ -28,7 +28,7 @@
 import { Scale, ArrowLeft } from 'lucide-vue-next';
 
 useHead({
-  title: '404 — Page introuvable | Juristique.bj',
+  title: '404 — Page introuvable | Jus Africa',
 });
 </script>
 

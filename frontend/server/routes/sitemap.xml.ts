@@ -2,7 +2,7 @@ import { defineEventHandler } from 'h3';
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
-  const baseUrl = 'https://juristique.bj';
+  const baseUrl = 'https://jusafrica.com';
   const apiUrl = config.public.apiBaseUrl || 'http://localhost:4000';
 
   // Static pages

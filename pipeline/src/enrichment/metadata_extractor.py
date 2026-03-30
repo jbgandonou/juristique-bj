@@ -23,7 +23,7 @@ Extrais les métadonnées suivantes si disponibles:
 - date_publication: date de publication au journal officiel (format YYYY-MM-DD si possible)
 - journal_officiel: référence du journal officiel
 - signataire: autorité signataire (président, ministre, etc.)
-- type_texte: type de texte (Loi, Décret, Ordonnance, Arrêté, etc.)
+- type_texte: type de texte. Valeurs possibles UNIQUEMENT: constitution, loi_organique, loi, ordonnance, decret, arrete, traite, acte_uniforme
 - institution: institution émettrice
 - mots_cles: liste de mots-clés pertinents (max 10)
 
@@ -35,7 +35,7 @@ Exemple:
   "date_publication": "2020-07-01",
   "journal_officiel": "JO n°45 du 1er juillet 2020",
   "signataire": "Président de la République",
-  "type_texte": "Loi",
+  "type_texte": "loi",
   "institution": "Assemblée Nationale",
   "mots_cles": ["élevage", "agriculture", "Bénin"]
 }}
@@ -76,7 +76,7 @@ Ne retourne que le JSON, sans texte supplémentaire."""
         prompt = self.build_prompt(title, text)
 
         message = self.client.messages.create(
-            model="claude-opus-4-5",
+            model="claude-sonnet-4-5-20241022",
             max_tokens=512,
             messages=[
                 {"role": "user", "content": prompt},

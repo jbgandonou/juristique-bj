@@ -14,7 +14,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Juristique.bj API')
+    .setTitle('Jus Africa API')
     .setDescription('API de la plateforme de droit africain francophone')
     .setVersion('1.0')
     .addBearerAuth()
@@ -24,6 +24,6 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   await app.listen(port, '0.0.0.0');
-  console.log(`Juristique API running on port ${port}`);
+  console.log(`Jus Africa API running on port ${port}`);
 }
 bootstrap();

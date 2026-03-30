@@ -8,7 +8,7 @@
           <span class="logo-icon">
             <Scale :size="20" />
           </span>
-          <span class="logo-text">Juristique.bj</span>
+          <span class="logo-text">Jus Africa</span>
         </NuxtLink>
         <button class="sidebar-close-btn" @click="mobileMenuOpen = false">
           <X :size="20" />

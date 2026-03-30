@@ -199,7 +199,25 @@
             </div>
             <div class="metadata-item">
               <dt>Source</dt>
-              <dd>{{ texte.source }}</dd>
+              <dd>
+                <template v-if="texte.sourceUrl">
+                  <a :href="texte.sourceUrl" target="_blank" rel="noopener noreferrer" class="source-link">
+                    {{ texte.source }}
+                    <ExternalLink :size="12" />
+                  </a>
+                </template>
+                <template v-else>{{ texte.source }}</template>
+              </dd>
+            </div>
+            <div v-if="texte.sourceUrl" class="metadata-item">
+              <dt>Lien de verification</dt>
+              <dd>
+                <a :href="texte.sourceUrl" target="_blank" rel="noopener noreferrer" class="verify-link">
+                  <ShieldCheck :size="14" />
+                  Verifier sur la source officielle
+                  <ExternalLink :size="12" />
+                </a>
+              </dd>
             </div>
             <div class="metadata-item">
               <dt>Hiérarchie des normes</dt>
@@ -289,7 +307,7 @@
 import {
   ChevronRight, ShieldCheck, Clock, Download, Copy, Bookmark,
   Calendar, Scale, FileText, AlignLeft, ScrollText, MessageSquare,
-  ThumbsUp, Info, Tag, Link2, ArrowUpRight, XCircle, Quote, FolderPlus,
+  ThumbsUp, Info, Tag, Link2, ArrowUpRight, XCircle, Quote, FolderPlus, ExternalLink,
 } from 'lucide-vue-next';
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
@@ -369,6 +387,7 @@ const texte = reactive({
   datePromulgation: '15 mars 2024',
   datePublication: '20 mars 2024',
   source: 'Journal Officiel du Bénin n°09/2024',
+  sourceUrl: '',
   summary: `La loi n°2024-15 portant Code du numérique établit le cadre juridique complet de la gouvernance numérique en République du Bénin. Elle régit les transactions électroniques, la cybersécurité, la protection des données à caractère personnel, ainsi que les obligations des opérateurs de services numériques opérant sur le territoire béninois. Ce texte fondateur vise à doter le Bénin d'un arsenal juridique moderne, aligné sur les meilleures pratiques internationales, pour accompagner la transformation digitale du pays.`,
   themes: [
     { name: 'Numérique & Télécoms', slug: 'numerique-telecoms' },
@@ -500,6 +519,7 @@ onMounted(async () => {
         ? new Date(textData.publicationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
         : texte.datePublication;
       texte.source = textData.sourceName || texte.source;
+      texte.sourceUrl = textData.sourceUrl || '';
       texte.summary = textData.summary || '';
       texte.themes = (textData.themes || []).map(t => ({ name: t.name, slug: t.slug }));
 
@@ -1136,5 +1156,39 @@ onMounted(async () => {
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+/* Source & verification links */
+.source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--juris-primary-light);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.source-link:hover {
+  color: var(--juris-primary);
+  text-decoration: underline;
+}
+
+.verify-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(46, 125, 50, 0.08);
+  color: var(--juris-success);
+  border-radius: var(--radius-full);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.verify-link:hover {
+  background: rgba(46, 125, 50, 0.16);
+  color: #1b5e20;
 }
 </style>

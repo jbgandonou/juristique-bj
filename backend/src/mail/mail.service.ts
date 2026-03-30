@@ -10,7 +10,7 @@ export class MailService {
   private readonly appUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.fromEmail = this.configService.get('MAIL_FROM') || 'noreply@juristique.bj';
+    this.fromEmail = this.configService.get('MAIL_FROM') || 'noreply@jusafrica.com';
     this.appUrl = this.configService.get('APP_URL') || 'http://localhost:3000';
 
     const host = this.configService.get('SMTP_HOST');
@@ -40,7 +40,7 @@ export class MailService {
 
     try {
       await this.transporter.sendMail({
-        from: `"Juristique.bj" <${this.fromEmail}>`,
+        from: `"Jus Africa" <${this.fromEmail}>`,
         to,
         subject,
         html,
@@ -53,9 +53,9 @@ export class MailService {
 
   async sendVerificationEmail(email: string, fullName: string, token: string) {
     const link = `${this.appUrl}/verifier-email?token=${token}`;
-    await this.send(email, 'Vérifiez votre adresse e-mail — Juristique.bj', `
+    await this.send(email, 'Vérifiez votre adresse e-mail — Jus Africa', `
       <div style="font-family: 'Inter', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px;">
-        <h2 style="color: #1A237E; margin-bottom: 16px;">Bienvenue sur Juristique.bj</h2>
+        <h2 style="color: #1A237E; margin-bottom: 16px;">Bienvenue sur Jus Africa</h2>
         <p>Bonjour ${fullName},</p>
         <p>Merci de vous être inscrit(e). Veuillez vérifier votre adresse e-mail en cliquant sur le bouton ci-dessous :</p>
         <p style="text-align: center; margin: 32px 0;">
@@ -65,14 +65,14 @@ export class MailService {
         </p>
         <p style="font-size: 13px; color: #5F6477;">Ce lien expire dans 24 heures. Si vous n'avez pas créé de compte, ignorez cet e-mail.</p>
         <hr style="border: none; border-top: 1px solid #E2E5EF; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #9CA3AF;">Juristique.bj — Droit africain francophone</p>
+        <p style="font-size: 12px; color: #9CA3AF;">Jus Africa — Droit africain francophone</p>
       </div>
     `);
   }
 
   async sendPasswordResetEmail(email: string, fullName: string, token: string) {
     const link = `${this.appUrl}/nouveau-mot-de-passe?token=${token}`;
-    await this.send(email, 'Réinitialisez votre mot de passe — Juristique.bj', `
+    await this.send(email, 'Réinitialisez votre mot de passe — Jus Africa', `
       <div style="font-family: 'Inter', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px;">
         <h2 style="color: #1A237E; margin-bottom: 16px;">Réinitialisation du mot de passe</h2>
         <p>Bonjour ${fullName},</p>
@@ -84,7 +84,7 @@ export class MailService {
         </p>
         <p style="font-size: 13px; color: #5F6477;">Ce lien expire dans 1 heure. Si vous n'avez pas fait cette demande, ignorez cet e-mail.</p>
         <hr style="border: none; border-top: 1px solid #E2E5EF; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #9CA3AF;">Juristique.bj — Droit africain francophone</p>
+        <p style="font-size: 12px; color: #9CA3AF;">Jus Africa — Droit africain francophone</p>
       </div>
     `);
   }
@@ -94,7 +94,7 @@ export class MailService {
       `<li style="margin-bottom: 8px;"><a href="${this.appUrl}/textes/${t.id}" style="color: #3949AB;">${t.title}</a></li>`
     ).join('');
 
-    await this.send(email, `Nouvelle alerte : ${alertName} — Juristique.bj`, `
+    await this.send(email, `Nouvelle alerte : ${alertName} — Jus Africa`, `
       <div style="font-family: 'Inter', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px;">
         <h2 style="color: #1A237E; margin-bottom: 16px;">Alerte veille juridique</h2>
         <p>Bonjour ${fullName},</p>
@@ -105,16 +105,16 @@ export class MailService {
             Voir mes alertes
           </a>
         </p>
-        <p style="font-size: 12px; color: #9CA3AF;">Juristique.bj — Droit africain francophone</p>
+        <p style="font-size: 12px; color: #9CA3AF;">Jus Africa — Droit africain francophone</p>
       </div>
     `);
   }
 
   async sendWelcomeEmail(email: string, fullName: string) {
-    await this.send(email, 'Bienvenue sur Juristique.bj !', `
+    await this.send(email, 'Bienvenue sur Jus Africa !', `
       <div style="font-family: 'Inter', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px;">
         <h2 style="color: #1A237E; margin-bottom: 16px;">Bienvenue, ${fullName} !</h2>
-        <p>Votre compte Juristique.bj a été vérifié avec succès.</p>
+        <p>Votre compte Jus Africa a été vérifié avec succès.</p>
         <p>Vous pouvez maintenant :</p>
         <ul style="padding-left: 20px; line-height: 2;">
           <li>Rechercher parmi 500+ textes juridiques de 26 pays</li>
@@ -126,7 +126,7 @@ export class MailService {
             Explorer les textes
           </a>
         </p>
-        <p style="font-size: 12px; color: #9CA3AF;">Juristique.bj — Droit africain francophone</p>
+        <p style="font-size: 12px; color: #9CA3AF;">Jus Africa — Droit africain francophone</p>
       </div>
     `);
   }

@@ -2,7 +2,7 @@
   <div class="about-page">
     <!-- Hero -->
     <section class="page-header fade-in-up">
-      <h1>À propos de <span class="gradient-text">Juristique.bj</span></h1>
+      <h1>À propos de <span class="gradient-text">Jus Africa</span></h1>
       <p class="mission-statement">
         Rendre le droit africain francophone accessible à tous les professionnels du droit
       </p>
@@ -17,7 +17,7 @@
         <div class="mission-body">
           <h2>Notre mission</h2>
           <p>
-            Juristique.bj est la première plateforme de référence juridique dédiée à l'Afrique francophone.
+            Jus Africa est la première plateforme de référence juridique dédiée à l'Afrique francophone.
             Nous agrégeons, classons et enrichissons les textes de droit de 26 pays afin que chaque juriste,
             magistrat, chercheur ou étudiant dispose d'un outil fiable, rapide et complet — depuis Dakar,
             Abidjan, Cotonou ou Paris.
@@ -77,33 +77,33 @@
         <p class="section-subtitle">Une question, un partenariat, un signalement ? Écrivez-nous.</p>
 
         <div class="contact-links">
-          <a href="mailto:contact@juristique.bj" class="contact-item">
+          <a href="mailto:contact@jusafrica.com" class="contact-item">
             <div class="contact-icon">
               <Mail :size="20" />
             </div>
             <div>
               <div class="contact-label">Email</div>
-              <div class="contact-value">contact@juristique.bj</div>
+              <div class="contact-value">contact@jusafrica.com</div>
             </div>
           </a>
 
-          <a href="https://twitter.com/juristique_bj" target="_blank" rel="noopener noreferrer" class="contact-item">
+          <a href="https://twitter.com/jusafrica" target="_blank" rel="noopener noreferrer" class="contact-item">
             <div class="contact-icon">
               <Twitter :size="20" />
             </div>
             <div>
               <div class="contact-label">Twitter / X</div>
-              <div class="contact-value">@juristique_bj</div>
+              <div class="contact-value">@jusafrica</div>
             </div>
           </a>
 
-          <a href="https://linkedin.com/company/juristique-bj" target="_blank" rel="noopener noreferrer" class="contact-item">
+          <a href="https://linkedin.com/company/jus-africa" target="_blank" rel="noopener noreferrer" class="contact-item">
             <div class="contact-icon">
               <Linkedin :size="20" />
             </div>
             <div>
               <div class="contact-label">LinkedIn</div>
-              <div class="contact-value">Juristique.bj</div>
+              <div class="contact-value">Jus Africa</div>
             </div>
           </a>
         </div>

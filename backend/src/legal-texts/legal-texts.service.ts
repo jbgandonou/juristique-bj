@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LegalText } from './entities/legal-text.entity';
 import { CreateLegalTextDto } from './dto/create-legal-text.dto';
+import { UpdateLegalTextDto } from './dto/update-legal-text.dto';
 import { QueryLegalTextDto } from './dto/query-legal-text.dto';
 import { PaginatedResult } from '../common/dto/pagination.dto';
 import { Theme } from '../themes/entities/theme.entity';
@@ -96,6 +97,63 @@ export class LegalTextsService {
 
     await this.repo.increment({ id }, 'viewCount', 1);
     return text;
+  }
+
+  async update(id: string, dto: UpdateLegalTextDto): Promise<LegalText> {
+    const text = await this.repo.findOne({ where: { id } });
+    if (!text) throw new NotFoundException(`LegalText ${id} not found`);
+
+    const { themeIds, ...rest } = dto;
+    Object.assign(text, rest);
+
+    if (themeIds?.length) {
+      text.themes = await this.themeRepo.findByIds(themeIds);
+    }
+
+    await this.repo.save(text);
+
+    const saved = await this.repo.findOne({ where: { id }, relations: ['country', 'themes'] });
+    if (!saved) throw new NotFoundException(`LegalText ${id} not found after update`);
+
+    if (saved.status === 'published') {
+      await this.searchService.indexDocument({
+        id: saved.id,
+        title: saved.title,
+        reference: saved.reference,
+        contentText: saved.contentText,
+        summary: saved.summary,
+        textType: saved.textType,
+        countryCode: saved.country?.code || '',
+        countryName: saved.country?.name || '',
+        themeSlugs: saved.themes?.map(t => t.slug) || [],
+        themeNames: saved.themes?.map(t => t.name) || [],
+        isInForce: saved.isInForce,
+        isVerified: saved.isVerified,
+        hierarchyRank: saved.hierarchyRank,
+        promulgationDate: saved.promulgationDate,
+        status: saved.status,
+      });
+    } else {
+      // Remove from search index if not published anymore
+      await this.searchService.removeDocument(id);
+    }
+
+    return saved;
+  }
+
+  async remove(id: string): Promise<void> {
+    const text = await this.repo.findOne({ where: { id } });
+    if (!text) throw new NotFoundException(`LegalText ${id} not found`);
+    await this.repo.remove(text);
+    await this.searchService.removeDocument(id);
+  }
+
+  async purgeAll(): Promise<{ deleted: number }> {
+    const count = await this.repo.count();
+    await this.repo.query('DELETE FROM text_themes');
+    await this.repo.query('DELETE FROM legal_texts');
+    await this.searchService.clearAll();
+    return { deleted: count };
   }
 
   async compareByTheme(themeSlug: string, countryCodes: string[]): Promise<Record<string, LegalText[]>> {

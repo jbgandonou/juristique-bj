@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param, Query, Res } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { LegalTextsService } from './legal-texts.service';
 import { CreateLegalTextDto } from './dto/create-legal-text.dto';
+import { UpdateLegalTextDto } from './dto/update-legal-text.dto';
 import { QueryLegalTextDto } from './dto/query-legal-text.dto';
 import { ExportService } from './export.service';
 
@@ -26,6 +27,12 @@ export class LegalTextsController {
     return this.service.findAll(query);
   }
 
+  @Delete('admin/purge-all')
+  @ApiOperation({ summary: 'Delete all legal texts (admin only)' })
+  purgeAll() {
+    return this.service.purgeAll();
+  }
+
   @Get('compare')
   @ApiOperation({ summary: 'Compare legal texts from different countries on the same theme' })
   @ApiQuery({ name: 'themeSlug', required: true })
@@ -35,6 +42,18 @@ export class LegalTextsController {
     @Query('countryCodes') countryCodes: string,
   ) {
     return this.service.compareByTheme(themeSlug, countryCodes.split(','));
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a legal text' })
+  update(@Param('id') id: string, @Body() dto: UpdateLegalTextDto) {
+    return this.service.update(id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a legal text' })
+  remove(@Param('id') id: string) {
+    return this.service.remove(id);
   }
 
   @Get(':id')
@@ -49,7 +68,7 @@ export class LegalTextsController {
     const buffer = await this.exportService.exportPdf(id);
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="juristique-${id}.pdf"`,
+      'Content-Disposition': `attachment; filename="jusafrica-${id}.pdf"`,
       'Content-Length': buffer.length,
     });
     res.end(buffer);
@@ -61,7 +80,7 @@ export class LegalTextsController {
     const buffer = await this.exportService.exportWord(id);
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'Content-Disposition': `attachment; filename="juristique-${id}.docx"`,
+      'Content-Disposition': `attachment; filename="jusafrica-${id}.docx"`,
       'Content-Length': buffer.length,
     });
     res.end(buffer);

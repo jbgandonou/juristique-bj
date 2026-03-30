@@ -2,7 +2,7 @@
   <div class="auth-layout">
     <div class="auth-left">
       <div class="auth-left-content">
-        <NuxtLink to="/" class="auth-logo">Juristique.bj</NuxtLink>
+        <NuxtLink to="/" class="auth-logo">Jus Africa</NuxtLink>
         <h2>Droit Africain Francophone</h2>
         <p>Accédez à tous les textes juridiques de 26 pays, classés par thème et vérifiés par des juristes professionnels.</p>
         <div class="auth-features">

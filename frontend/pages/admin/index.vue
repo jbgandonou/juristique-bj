@@ -4,7 +4,7 @@
     <div class="page-header fade-in-up">
       <div>
         <h2 class="page-title">Tableau de bord</h2>
-        <p class="page-subtitle">Vue d'ensemble de la plateforme Juristique.bj</p>
+        <p class="page-subtitle">Vue d'ensemble de la plateforme Jus Africa</p>
       </div>
       <div class="page-header-actions">
         <span class="last-update">Mis à jour à 14:32</span>

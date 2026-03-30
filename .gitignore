@@ -34,3 +34,4 @@ minio-data/
 coverage/
 htmlcov/
 .pytest_cache/
+.vercel

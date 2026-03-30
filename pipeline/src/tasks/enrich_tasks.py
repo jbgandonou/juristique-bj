@@ -5,6 +5,51 @@ from src.enrichment.theme_classifier import ThemeClassifier
 from src.enrichment.metadata_extractor import MetadataExtractor
 
 
+def normalize_text_type(raw_type: str | None) -> str:
+    """Normalize text type string to match backend TextType enum."""
+    if not raw_type:
+        return "loi"
+
+    mapping = {
+        "constitution": "constitution",
+        "loi organique": "loi_organique",
+        "loi": "loi",
+        "ordonnance": "ordonnance",
+        "décret": "decret",
+        "decret": "decret",
+        "decree": "decret",
+        "arrêté": "arrete",
+        "arrete": "arrete",
+        "arrété": "arrete",
+        "traité": "traite",
+        "traite": "traite",
+        "treaty": "traite",
+        "acte uniforme": "acte_uniforme",
+        "regulation": "decret",
+        "legislation": "loi",
+        "act": "loi",
+        "law": "loi",
+        "order": "ordonnance",
+        "directive": "decret",
+        "règlement": "decret",
+        "reglement": "decret",
+        "code": "loi",
+    }
+
+    raw_lower = raw_type.lower().strip()
+
+    # Direct match
+    if raw_lower in mapping:
+        return mapping[raw_lower]
+
+    # Partial match - check if any key is contained in the raw type
+    for key, value in mapping.items():
+        if key in raw_lower:
+            return value
+
+    return "loi"  # Default fallback
+
+
 @app.task(name="src.tasks.enrich_tasks.enrich_text")
 def enrich_text(job_id: str, doc_data: dict):
     asyncio.run(_enrich_text(job_id, doc_data))
@@ -40,7 +85,8 @@ async def _enrich_text(job_id: str, doc_data: dict):
             continue
 
     # Create the legal text
-    text_type = metadata.get("text_type", "loi")
+    raw_type = metadata.get("text_type") or doc_data.get("text_type")
+    text_type = normalize_text_type(raw_type)
     hierarchy_map = {
         "constitution": 1, "loi_organique": 2, "loi": 3,
         "ordonnance": 4, "decret": 5, "arrete": 6,
@@ -67,5 +113,15 @@ async def _enrich_text(job_id: str, doc_data: dict):
 
     # Remove None values
     legal_text_data = {k: v for k, v in legal_text_data.items() if v is not None}
+
+    # Validate required fields
+    if not legal_text_data.get("title") or len(legal_text_data.get("title", "")) < 5:
+        print(f"[SKIP] Job {job_id}: title too short or missing")
+        return
+
+    # Validate text_type is in allowed values
+    allowed_types = {"constitution", "loi_organique", "loi", "ordonnance", "decret", "arrete", "traite", "acte_uniforme"}
+    if legal_text_data.get("textType") not in allowed_types:
+        legal_text_data["textType"] = "loi"
 
     await api.create_legal_text(legal_text_data)

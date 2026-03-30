@@ -35,7 +35,7 @@ export class ExportService {
 
       // Header
       doc.fontSize(10).fillColor('#5F6477')
-        .text('Juristique.bj — Droit africain francophone', { align: 'center' });
+        .text('Jus Africa — Droit africain francophone', { align: 'center' });
       doc.moveDown(0.5);
       doc.moveTo(60, doc.y).lineTo(535, doc.y).stroke('#E2E5EF');
       doc.moveDown(1);
@@ -101,7 +101,7 @@ export class ExportService {
       doc.moveTo(60, doc.y).lineTo(535, doc.y).stroke('#E2E5EF');
       doc.moveDown(0.5);
       doc.fontSize(8).fillColor('#9CA3AF')
-        .text(`Document généré par Juristique.bj le ${new Date().toLocaleDateString('fr-FR')}`, { align: 'center' });
+        .text(`Document généré par Jus Africa le ${new Date().toLocaleDateString('fr-FR')}`, { align: 'center' });
       doc.fontSize(8).text('Ce document est fourni à titre informatif. Seul le texte publié au Journal Officiel fait foi.', { align: 'center' });
 
       doc.end();
@@ -116,7 +116,7 @@ export class ExportService {
     // Header
     children.push(new Paragraph({
       alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: 'Juristique.bj — Droit africain francophone', size: 18, color: '5F6477' })],
+      children: [new TextRun({ text: 'Jus Africa — Droit africain francophone', size: 18, color: '5F6477' })],
     }));
 
     // Country & Type
@@ -201,7 +201,7 @@ export class ExportService {
     children.push(new Paragraph({
       spacing: { before: 400 },
       children: [new TextRun({
-        text: `Document généré par Juristique.bj le ${new Date().toLocaleDateString('fr-FR')}. Ce document est fourni à titre informatif.`,
+        text: `Document généré par Jus Africa le ${new Date().toLocaleDateString('fr-FR')}. Ce document est fourni à titre informatif.`,
         size: 16, color: '9CA3AF', italics: true,
       })],
     }));
@@ -224,7 +224,7 @@ export class ExportService {
       });
       parts.push(date);
     }
-    parts.push('[En ligne] Juristique.bj');
+    parts.push('[En ligne] Jus Africa');
     return parts.join(', ');
   }
 }

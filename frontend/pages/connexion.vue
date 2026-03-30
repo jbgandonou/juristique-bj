@@ -1,7 +1,7 @@
 <template>
   <div class="login-page fade-in-up">
     <h1>Connexion</h1>
-    <p class="subtitle">Accédez à votre compte Juristique.bj</p>
+    <p class="subtitle">Accédez à votre compte Jus Africa</p>
 
     <form @submit.prevent="handleLogin" class="auth-form">
       <div class="form-group">

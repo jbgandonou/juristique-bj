@@ -1,5 +1,5 @@
 {
-  "name": "juristique-frontend",
+  "name": "jusafrica-frontend",
   "private": true,
   "scripts": {
     "dev": "nuxt dev",

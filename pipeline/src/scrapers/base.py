@@ -15,6 +15,7 @@ class RawDocument:
     summary: str | None = None
     pdf_url: str | None = None
     content_html: str | None = None
+    content_text: str | None = None
     themes: list[str] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
@@ -32,7 +33,7 @@ class BaseScraper(ABC):
         self.client = httpx.AsyncClient(
             timeout=30.0,
             headers={
-                "User-Agent": "Juristique.bj Legal Data Collector/1.0",
+                "User-Agent": "JusAfrica Legal Data Collector/1.0",
                 "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
             },
         )

@@ -221,6 +221,22 @@ export const useApi = () => {
   const deleteEditorNote = (id: string) =>
     apiFetch<void>(`/editor-notes/${id}`, { method: 'DELETE' });
 
+  // Delete a legal text
+  const deleteLegalText = (id: string) =>
+    apiFetch<void>(`/legal-texts/${id}`, { method: 'DELETE' });
+
+  // Purge all legal texts (admin)
+  const purgeAllLegalTexts = () =>
+    apiFetch<{ deleted: number }>('/legal-texts/admin/purge-all', { method: 'DELETE' });
+
+  // Update a legal text
+  const updateLegalText = (id: string, data: any) =>
+    apiFetch<LegalText>(`/legal-texts/${id}`, { method: 'PATCH', body: data });
+
+  // Create a legal text (admin manual creation)
+  const createLegalText = (data: any) =>
+    apiFetch<LegalText>('/legal-texts', { method: 'POST', body: data });
+
   return {
     apiFetch,
     getCountries,
@@ -267,6 +283,10 @@ export const useApi = () => {
     createEditorNote,
     updateEditorNote,
     deleteEditorNote,
+    deleteLegalText,
+    purgeAllLegalTexts,
+    updateLegalText,
+    createLegalText,
   };
 };
 

@@ -99,6 +99,15 @@ export class SearchService implements OnModuleInit {
     }
   }
 
+  async clearAll() {
+    try {
+      await this.client.collections(COLLECTION_NAME).delete();
+      await this.ensureCollection();
+    } catch (error) {
+      this.logger.error(`Failed to clear search index: ${error}`);
+    }
+  }
+
   async search(params: {
     q: string;
     countryCode?: string;

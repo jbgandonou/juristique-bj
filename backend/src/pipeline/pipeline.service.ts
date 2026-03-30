@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { InjectQueue } from '@nestjs/bullmq';
 import { Repository } from 'typeorm';
+import { Queue } from 'bullmq';
 import { PipelineJob } from './entities/pipeline-job.entity';
 import { SourceConfig } from './entities/source-config.entity';
 import { CreatePipelineJobDto, CreateSourceConfigDto } from './dto/create-pipeline-job.dto';
@@ -13,11 +15,25 @@ export class PipelineService {
     private readonly jobRepo: Repository<PipelineJob>,
     @InjectRepository(SourceConfig)
     private readonly sourceRepo: Repository<SourceConfig>,
+    @InjectQueue('pipeline')
+    private readonly pipelineQueue: Queue,
   ) {}
 
   async createJob(dto: CreatePipelineJobDto): Promise<PipelineJob> {
     const job = this.jobRepo.create(dto);
-    return this.jobRepo.save(job);
+    const saved = await this.jobRepo.save(job);
+
+    // Dispatch to BullMQ queue
+    await this.pipelineQueue.add('scrape', {
+      pipelineJobId: saved.id,
+      sourceName: saved.sourceName,
+    }, {
+      attempts: 1,
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+
+    return saved;
   }
 
   async findAllJobs(pagination: PaginationDto): Promise<PaginatedResult<PipelineJob>> {

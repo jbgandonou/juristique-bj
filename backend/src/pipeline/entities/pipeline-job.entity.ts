@@ -47,6 +47,9 @@ export class PipelineJob extends BaseEntity {
   @Column({ name: 'error_message', type: 'text', nullable: true })
   errorMessage: string;
 
+  @Column({ name: 'texts_count', default: 0 })
+  textsCount: number;
+
   @Column({ name: 'retry_count', default: 0 })
   retryCount: number;
 

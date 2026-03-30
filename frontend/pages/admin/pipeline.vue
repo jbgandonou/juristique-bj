@@ -245,7 +245,9 @@ onMounted(async () => {
         started: j.startedAt
           ? new Date(j.startedAt).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
           : j.started ?? '—',
-        duration: j.durationMs != null ? `${Math.round(j.durationMs / 1000)}s` : j.duration ?? null,
+        duration: j.completedAt && j.startedAt
+          ? `${Math.round((new Date(j.completedAt).getTime() - new Date(j.startedAt).getTime()) / 1000)}s`
+          : j.durationMs != null ? `${Math.round(j.durationMs / 1000)}s` : j.duration ?? null,
         textes: j.textsCount ?? j.textes ?? 0,
         progress: j.progress ?? 0,
         errorMessage: j.errorMessage ?? null,

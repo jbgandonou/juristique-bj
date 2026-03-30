@@ -237,6 +237,19 @@ export const useApi = () => {
   const createLegalText = (data: any) =>
     apiFetch<LegalText>('/legal-texts', { method: 'POST', body: data });
 
+  // Users (admin)
+  const getUsers = (page = 1, limit = 50) =>
+    apiFetch<any>(`/users?page=${page}&limit=${limit}`);
+
+  const getUserStats = () =>
+    apiFetch<any>('/users/stats');
+
+  const updateUserRole = (id: string, role: string) =>
+    apiFetch<any>(`/users/${id}/role`, { method: 'PATCH', body: { role } });
+
+  const deleteUser = (id: string) =>
+    apiFetch<void>(`/users/${id}`, { method: 'DELETE' });
+
   return {
     apiFetch,
     getCountries,
@@ -287,6 +300,10 @@ export const useApi = () => {
     purgeAllLegalTexts,
     updateLegalText,
     createLegalText,
+    getUsers,
+    getUserStats,
+    updateUserRole,
+    deleteUser,
   };
 };
 

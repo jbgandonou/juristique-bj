@@ -163,90 +163,7 @@ const filterSource = ref('');
 const filterCountry = ref('');
 const filterStatus = ref('');
 
-const mockRows = [
-  {
-    id: '1',
-    title: 'Loi n°2024-15 portant Code du numérique',
-    type: 'Loi',
-    country: 'Bénin',
-    source: 'JO Bénin',
-    ocrScore: 94,
-    date: '15 mars 2024',
-    status: 'pending_review',
-  },
-  {
-    id: '2',
-    title: 'Acte uniforme révisé relatif au droit commercial général',
-    type: 'Acte uniforme',
-    country: 'OHADA',
-    source: 'OHADA',
-    ocrScore: 98,
-    date: '15 déc. 2023',
-    status: 'verified',
-  },
-  {
-    id: '3',
-    title: "Décret n°2023-412 relatif à l'environnement",
-    type: 'Décret',
-    country: 'Sénégal',
-    source: 'Primature SN',
-    ocrScore: 76,
-    date: '22 oct. 2023',
-    status: 'pending_review',
-  },
-  {
-    id: '4',
-    title: 'Loi portant réglementation des télécommunications',
-    type: 'Loi',
-    country: 'Togo',
-    source: 'FAOLEX',
-    ocrScore: 88,
-    date: '08 jan. 2024',
-    status: 'pending_review',
-  },
-  {
-    id: '5',
-    title: "Ordonnance n°2023-09 relative au droit foncier",
-    type: 'Ordonnance',
-    country: "Côte d'Ivoire",
-    source: "Assemblée CI",
-    ocrScore: 61,
-    date: '30 nov. 2023',
-    status: 'draft',
-  },
-  {
-    id: '6',
-    title: 'Règlement CEMAC sur les changes extérieurs',
-    type: 'Règlement',
-    country: 'OHADA',
-    source: 'OHADA',
-    ocrScore: 91,
-    date: '05 fév. 2024',
-    status: 'verified',
-  },
-  {
-    id: '7',
-    title: 'Loi n°2023-32 portant code minier',
-    type: 'Loi',
-    country: 'Bénin',
-    source: 'JO Bénin',
-    ocrScore: 83,
-    date: '12 déc. 2023',
-    status: 'pending_review',
-  },
-  {
-    id: '8',
-    title: 'Directive sur la protection des données personnelles',
-    type: 'Directive',
-    country: 'OHADA',
-    source: 'FAOLEX',
-    ocrScore: 72,
-    date: '20 mars 2024',
-    status: 'draft',
-  },
-];
-
-const rows = ref<any[]>([...mockRows]);
+const rows = ref<any[]>([]);
 
 onMounted(async () => {
   try {
@@ -266,7 +183,8 @@ onMounted(async () => {
       }));
     }
   } catch (e) {
-    console.log('Queue API not available, using mock data');
+    console.log('Queue API not available');
+    rows.value = [];
   } finally {
     loading.value = false;
   }
@@ -289,30 +207,28 @@ const resetFilters = () => {
 
 const approveRow = async (data: any) => {
   try {
-    // TODO: wire to real PATCH endpoint when available
     await authFetch(`/legal-texts/${data.id}`, {
       method: 'PATCH',
       body: { status: 'published', isVerified: true },
     });
+    const idx = rows.value.findIndex((r) => r.id === data.id);
+    if (idx !== -1) rows.value.splice(idx, 1);
   } catch (e) {
-    console.log('Approve API not available, updating locally');
+    console.error('Failed to approve', e);
   }
-  const idx = rows.value.findIndex((r) => r.id === data.id);
-  if (idx !== -1) rows.value[idx].status = 'verified';
 };
 
 const rejectRow = async (data: any) => {
   try {
-    // TODO: wire to real PATCH endpoint when available
     await authFetch(`/legal-texts/${data.id}`, {
       method: 'PATCH',
       body: { status: 'draft' },
     });
+    const idx = rows.value.findIndex((r) => r.id === data.id);
+    if (idx !== -1) rows.value.splice(idx, 1);
   } catch (e) {
-    console.log('Reject API not available, updating locally');
+    console.error('Failed to reject', e);
   }
-  const idx = rows.value.findIndex((r) => r.id === data.id);
-  if (idx !== -1) rows.value[idx].status = 'draft';
 };
 
 const statusLabel = (s: string) =>

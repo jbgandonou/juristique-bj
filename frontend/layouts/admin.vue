@@ -79,7 +79,7 @@
 import { ref } from 'vue';
 import {
   LayoutDashboard, ClipboardList, FileText, Database,
-  Globe, Users, Shield, Scale, Menu, X, Bell,
+  Globe, Users, Scale, Menu, X, Bell,
 } from 'lucide-vue-next';
 
 const sidebarCollapsed = ref(false);
@@ -90,9 +90,7 @@ const navItems = [
   { to: '/admin/queue', label: 'Queue éditoriale', icon: ClipboardList },
   { to: '/admin/textes', label: 'Textes', icon: FileText },
   { to: '/admin/pipeline', label: 'Pipeline', icon: Database },
-  { to: '/admin/sources', label: 'Sources', icon: Globe },
   { to: '/admin/utilisateurs', label: 'Utilisateurs', icon: Users },
-  { to: '/admin/moderation', label: 'Modération', icon: Shield },
 ];
 </script>
 

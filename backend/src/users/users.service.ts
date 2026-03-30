@@ -100,4 +100,35 @@ export class UsersService {
     user.resetTokenExpires = null as any;
     return this.repo.save(user);
   }
+
+  async findAll(page: number = 1, limit: number = 50): Promise<{ data: User[]; total: number; page: number; limit: number }> {
+    const [data, total] = await this.repo.findAndCount({
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: ['country'],
+    });
+    return { data, total, page, limit };
+  }
+
+  async getStats(): Promise<{ total: number; admins: number; editors: number; premium: number; free: number; verified: number }> {
+    const total = await this.repo.count();
+    const admins = await this.repo.count({ where: { role: UserRole.ADMIN } });
+    const editors = await this.repo.count({ where: { role: UserRole.EDITOR } });
+    const premium = await this.repo.count({ where: { role: UserRole.PREMIUM } });
+    const free = await this.repo.count({ where: { role: UserRole.FREE } });
+    const verified = await this.repo.count({ where: { isVerified: true } });
+    return { total, admins, editors, premium, free, verified };
+  }
+
+  async updateRole(id: string, role: string): Promise<User> {
+    const user = await this.findById(id);
+    user.role = role as UserRole;
+    return this.repo.save(user);
+  }
+
+  async remove(id: string): Promise<void> {
+    const user = await this.findById(id);
+    await this.repo.remove(user);
+  }
 }

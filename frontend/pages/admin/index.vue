@@ -150,7 +150,7 @@ import Button from 'primevue/button';
 
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
-const { getLegalTexts, getPipelineJobs, getPipelineSources } = useApi();
+const { getLegalTexts, getPipelineJobs, getPipelineSources, getUserStats } = useApi();
 
 const loading = ref(true);
 
@@ -221,15 +221,17 @@ const recentActivity = ref([
 
 onMounted(async () => {
   try {
-    const [publishedRes, pendingRes, jobsRes, sourcesRes] = await Promise.all([
+    const [publishedRes, pendingRes, jobsRes, sourcesRes, userStatsRes] = await Promise.all([
       getLegalTexts({ status: 'published', limit: '1' }),
       getLegalTexts({ status: 'pending_review', limit: '1' }),
       getPipelineJobs(1, 5),
       getPipelineSources(),
+      getUserStats(),
     ]);
     // Update stats with real data
     stats.value[0].value = publishedRes.total.toLocaleString();
     stats.value[1].value = pendingRes.total.toLocaleString();
+    stats.value[2].value = (userStatsRes.total ?? userStatsRes.count ?? 0).toLocaleString();
     stats.value[3].value = sourcesRes.length.toString();
     // Update activity table with real jobs
     if (jobsRes.data?.length) {

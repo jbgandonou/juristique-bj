@@ -351,48 +351,7 @@ const formatDate = (date: string | null) => {
   return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-const mockResults: Record<string, any[]> = {
-  BJ: [
-    {
-      id: '1',
-      title: 'Loi n°2024-15 portant Code du numérique en République du Bénin',
-      reference: 'LOI-BJ-2024-15',
-      textType: 'Loi',
-      isInForce: true,
-      promulgationDate: '2024-03-15',
-      summary: 'Établit le cadre juridique complet de la gouvernance numérique, régissant les transactions électroniques, la cybersécurité et la protection des données.',
-    },
-    {
-      id: '2',
-      title: 'Décret n°2024-412 fixant les modalités d\'application du Code du numérique',
-      reference: 'DEC-BJ-2024-412',
-      textType: 'Décret',
-      isInForce: true,
-      promulgationDate: '2024-06-10',
-      summary: 'Précise les conditions d\'application du Code du numérique, notamment pour la protection des données personnelles.',
-    },
-  ],
-  SN: [
-    {
-      id: '3',
-      title: 'Loi n°2008-11 sur la cybercriminalité au Sénégal',
-      reference: 'LOI-SN-2008-11',
-      textType: 'Loi',
-      isInForce: true,
-      promulgationDate: '2008-01-25',
-      summary: 'Fixe les infractions relatives aux technologies de l\'information et de la communication et les sanctions applicables.',
-    },
-    {
-      id: '4',
-      title: 'Loi n°2008-12 sur la protection des données à caractère personnel',
-      reference: 'LOI-SN-2008-12',
-      textType: 'Loi',
-      isInForce: true,
-      promulgationDate: '2008-01-25',
-      summary: 'Régit la collecte, le traitement et la conservation des données personnelles au Sénégal.',
-    },
-  ],
-};
+const mockResults: Record<string, any[]> = {};
 
 const runComparison = async () => {
   if (!selectedTheme.value || !selectedCountry1.value || !selectedCountry2.value) return;

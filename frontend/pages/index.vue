@@ -18,15 +18,15 @@
       <div class="stats-bar">
         <div class="stat-item">
           <FileText :size="16" />
-          <span class="stat-value">500+</span> textes
+          <span class="stat-value">{{ totalTexts }}</span> textes
         </div>
         <div class="stat-item">
           <Globe :size="16" />
-          <span class="stat-value">26</span> pays
+          <span class="stat-value">{{ totalCountries }}</span> pays
         </div>
         <div class="stat-item">
           <BookOpen :size="16" />
-          <span class="stat-value">42</span> thèmes
+          <span class="stat-value">{{ totalThemes }}</span> thèmes
         </div>
         <div class="stat-item">
           <ShieldCheck :size="16" />
@@ -40,7 +40,7 @@
       <div class="section-header">
         <h2>Thèmes populaires</h2>
         <NuxtLink to="/themes" class="see-all">
-          Voir les 42 thèmes
+          Voir tous les thèmes
           <ChevronRight :size="16" />
         </NuxtLink>
       </div>
@@ -148,56 +148,14 @@ const iconMap: Record<string, any> = {
   'cybersecurite': Cpu,
 };
 
-// Mock data — kept as fallback if API is not available
-const popularThemes = ref([
-  { name: 'Constitution', slug: 'constitution', icon: ScrollText, count: 26 },
-  { name: 'Droit des affaires', slug: 'droit-affaires-ohada', icon: Briefcase, count: 45 },
-  { name: 'Énergie électrique', slug: 'energie-electrique', icon: Bolt, count: 38 },
-  { name: 'Numérique', slug: 'numerique-telecoms', icon: Wifi, count: 52 },
-  { name: 'Environnement', slug: 'environnement', icon: Leaf, count: 67 },
-  { name: 'Droit bancaire', slug: 'droit-bancaire', icon: Landmark, count: 31 },
-  { name: 'Droit pénal', slug: 'droit-penal', icon: Gavel, count: 28 },
-  { name: 'Cybersécurité', slug: 'cybersecurite', icon: Cpu, count: 19 },
-]);
+// Data — populated from API
+const popularThemes = ref<any[]>([]);
+const recentTexts = ref<any[]>([]);
 
-const recentTexts = ref([
-  {
-    id: '1',
-    title: 'Loi n°2024-15 portant Code du numérique en République du Bénin',
-    country: 'Bénin',
-    date: '15 mars 2024',
-    type: 'Loi',
-    isInForce: true,
-    themes: ['Numérique', 'Données personnelles'],
-  },
-  {
-    id: '2',
-    title: "Acte uniforme révisé relatif au droit commercial général (AUDCG)",
-    country: 'OHADA (17 pays)',
-    date: '15 déc. 2010',
-    type: 'Acte uniforme',
-    isInForce: true,
-    themes: ['Droit des affaires'],
-  },
-  {
-    id: '3',
-    title: "Loi n°2023-08 relative à l'énergie électrique au Togo",
-    country: 'Togo',
-    date: '22 juin 2023',
-    type: 'Loi',
-    isInForce: true,
-    themes: ['Énergie électrique', 'Énergie renouvelable'],
-  },
-  {
-    id: '4',
-    title: 'Constitution de la République du Sénégal',
-    country: 'Sénégal',
-    date: '22 jan. 2001',
-    type: 'Constitution',
-    isInForce: true,
-    themes: ['Constitution'],
-  },
-]);
+// Stats — populated from API
+const totalTexts = ref(0);
+const totalCountries = ref(0);
+const totalThemes = ref(0);
 
 const { getThemes, getLegalTexts } = useApi();
 
@@ -213,8 +171,9 @@ onMounted(async () => {
         name: t.name,
         slug: t.slug,
         icon: iconMap[t.slug] || FileText,
-        count: t.textCount,
+        count: t.textCount ?? 0,
       }));
+      totalThemes.value = themesRes.total ?? themesRes.data.length;
     }
 
     if (textsRes.data?.length) {
@@ -229,6 +188,8 @@ onMounted(async () => {
         isInForce: t.isInForce,
         themes: t.themes?.map(th => th.name) || [],
       }));
+      totalTexts.value = textsRes.total ?? textsRes.data.length;
+      totalCountries.value = textsRes.countriesCount ?? 0;
     }
   } catch (e) {
     console.log('API not available, using mock data');

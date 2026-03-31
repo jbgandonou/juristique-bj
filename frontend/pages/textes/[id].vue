@@ -372,125 +372,30 @@ const copyCitation = () => {
   alert('Citation copiée dans le presse-papiers !');
 };
 
-// Mock data for Beninese digital law
+// Text data — populated from API
 const texte = reactive({
-  id: '1',
-  title: 'Loi n°2024-15 portant Code du numérique en République du Bénin',
-  reference: 'LOI-BJ-2024-15',
-  country: 'Bénin',
-  flag: '🇧🇯',
-  type: 'Loi',
+  id: '',
+  title: '',
+  reference: '',
+  country: '',
+  flag: '',
+  type: '',
   isInForce: true,
-  verified: true,
-  hierarchyRank: 2,
-  hierarchyLabel: 'Loi ordinaire',
-  datePromulgation: '15 mars 2024',
-  datePublication: '20 mars 2024',
-  source: 'Journal Officiel du Bénin n°09/2024',
+  verified: false,
+  hierarchyRank: 0,
+  hierarchyLabel: '',
+  datePromulgation: '',
+  datePublication: '',
+  source: '',
   sourceUrl: '',
-  summary: `La loi n°2024-15 portant Code du numérique établit le cadre juridique complet de la gouvernance numérique en République du Bénin. Elle régit les transactions électroniques, la cybersécurité, la protection des données à caractère personnel, ainsi que les obligations des opérateurs de services numériques opérant sur le territoire béninois. Ce texte fondateur vise à doter le Bénin d'un arsenal juridique moderne, aligné sur les meilleures pratiques internationales, pour accompagner la transformation digitale du pays.`,
-  themes: [
-    { name: 'Numérique & Télécoms', slug: 'numerique-telecoms' },
-    { name: 'Protection des données', slug: 'donnees-personnelles' },
-    { name: 'Cybersécurité', slug: 'cybersecurite' },
-    { name: 'Commerce électronique', slug: 'commerce-electronique' },
-  ],
-  articles: [
-    {
-      id: 'preambule',
-      heading: 'Préambule',
-      body: "La présente loi s'inscrit dans le cadre de la mise en œuvre de la stratégie nationale de développement du numérique du Bénin. Elle vise à créer un environnement juridique propice au développement de l'économie numérique, à la protection des droits des citoyens dans le cyberespace et au renforcement de la confiance numérique.",
-    },
-    {
-      id: 'art1',
-      heading: 'Article 1 — Objet',
-      body: "La présente loi a pour objet d'établir les règles applicables aux communications électroniques, aux transactions en ligne, à la protection des données à caractère personnel, à la cybersécurité et aux infractions commises au moyen des technologies de l'information et de la communication sur le territoire de la République du Bénin.",
-    },
-    {
-      id: 'art2',
-      heading: 'Article 2 — Champ d\'application',
-      body: "La présente loi s'applique à toute personne physique ou morale, publique ou privée, qui collecte, traite, stocke ou transmet des données électroniques sur le territoire béninois, y compris les entités étrangères dont les services sont accessibles depuis le Bénin et traitent des données de ressortissants béninois.",
-    },
-    {
-      id: 'art3',
-      heading: 'Article 3 — Définitions',
-      body: "Au sens de la présente loi, on entend par : (1) « Donnée à caractère personnel » : toute information se rapportant à une personne physique identifiée ou identifiable ; (2) « Traitement » : toute opération appliquée à des données personnelles, notamment la collecte, l'enregistrement, l'organisation, la conservation, la modification, l'extraction, la consultation, l'utilisation ou la communication ; (3) « Responsable du traitement » : la personne physique ou morale qui détermine les finalités et les moyens du traitement de données.",
-    },
-    {
-      id: 'art12',
-      heading: 'Article 12 — Consentement',
-      body: "Le traitement des données à caractère personnel est licite si la personne concernée a consenti à celui-ci pour une ou plusieurs finalités spécifiques. Le consentement doit être libre, éclairé, spécifique et univoque. Il peut être retiré à tout moment, sans que ce retrait porte atteinte à la licéité du traitement fondé sur le consentement effectué avant ce retrait.",
-    },
-    {
-      id: 'art25',
-      heading: 'Article 25 — Autorité de régulation',
-      body: "Il est institué une Autorité de Protection des Données Personnelles (APDP), autorité administrative indépendante chargée de veiller au respect des dispositions de la présente loi. Elle est dotée de la personnalité morale et de l'autonomie financière. L'APDP dispose d'un pouvoir d'instruction, d'enquête et de sanction à l'égard des responsables de traitement.",
-    },
-    {
-      id: 'art38',
-      heading: 'Article 38 — Sanctions pénales',
-      body: "Toute personne qui collecte ou traite des données à caractère personnel sans satisfaire aux formalités préalables est punie d'un emprisonnement de six mois à cinq ans et d'une amende de 500.000 à 50.000.000 de francs CFA ou de l'une de ces deux peines seulement. En cas de récidive, les peines sont portées au double.",
-    },
-  ],
-  comments: [
-    {
-      id: 'c1',
-      name: 'Me Aïda Sossou',
-      initials: 'AS',
-      profession: 'Avocate au Barreau du Bénin',
-      date: '18 mars 2024',
-      body: "Ce Code du numérique représente une avancée majeure pour le droit béninois. L'article 25 instituant l'APDP est particulièrement bienvenu : le Bénin se dote enfin d'une autorité de régulation comparable aux CNIL européennes. Les entreprises opérant au Bénin ont désormais un interlocuteur institutionnel clair pour leurs questions de conformité.",
-      upvotes: 34,
-      upvoted: false,
-    },
-    {
-      id: 'c2',
-      name: 'Prof. Kodjo Akakpo',
-      initials: 'KA',
-      profession: 'Professeur de droit public, UAC Cotonou',
-      date: '22 mars 2024',
-      body: "Du point de vue académique, la définition du consentement à l'article 12 s'aligne étroitement sur le RGPD européen, ce qui facilitera la convergence juridique nécessaire pour les flux transfrontaliers de données. Toutefois, la pratique des transferts de données vers des pays tiers mériterait d'être précisée dans les décrets d'application.",
-      upvotes: 21,
-      upvoted: false,
-    },
-    {
-      id: 'c3',
-      name: 'Romuald Gbaguidi',
-      initials: 'RG',
-      profession: 'Consultant en conformité numérique',
-      date: '5 avr. 2024',
-      body: "Les sanctions prévues à l'article 38 sont significatives et crédibles. Avec 50 millions de FCFA d'amende maximale, le législateur béninois envoie un signal fort. Il sera néanmoins important que l'APDP soit dotée de ressources humaines et techniques suffisantes pour assurer une application effective de la loi.",
-      upvotes: 15,
-      upvoted: false,
-    },
-  ],
+  summary: '',
+  themes: [] as { name: string; slug: string }[],
+  articles: [] as { id: string; heading: string; body: string }[],
+  comments: [] as any[],
   relatedTexts: {
-    modifiedBy: [
-      {
-        id: '11',
-        title: 'Décret n°2024-412 fixant les modalités d\'application du Code du numérique',
-        date: '10 juin 2024',
-      },
-    ],
-    abrogates: [
-      {
-        id: '12',
-        title: 'Loi n°2017-20 portant Code du numérique en République du Bénin (ancienne version)',
-        date: '20 avr. 2018',
-      },
-    ],
-    citedBy: [
-      {
-        id: '13',
-        title: 'Décret n°2024-523 portant organisation de l\'APDP',
-        date: '1 août 2024',
-      },
-      {
-        id: '14',
-        title: 'Arrêté n°2024-189 relatif aux conditions de traitement des données de santé',
-        date: '15 sept. 2024',
-      },
-    ],
+    modifiedBy: [] as any[],
+    abrogates: [] as any[],
+    citedBy: [] as any[],
   },
 });
 

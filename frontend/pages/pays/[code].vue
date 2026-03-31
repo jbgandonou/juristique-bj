@@ -172,35 +172,35 @@ const countryData: Record<string, any> = {
     flag: '🇧🇯',
     region: "Afrique de l'Ouest",
     legalSystem: 'Civil law',
-    texts: 45,
+    texts: 0,
   },
   SN: {
     name: 'République du Sénégal',
     flag: '🇸🇳',
     region: "Afrique de l'Ouest",
     legalSystem: 'Civil law',
-    texts: 38,
+    texts: 0,
   },
   CI: {
     name: "République de Côte d'Ivoire",
     flag: '🇨🇮',
     region: "Afrique de l'Ouest",
     legalSystem: 'Civil law',
-    texts: 42,
+    texts: 0,
   },
   TG: {
     name: 'République Togolaise',
     flag: '🇹🇬',
     region: "Afrique de l'Ouest",
     legalSystem: 'Civil law',
-    texts: 22,
+    texts: 0,
   },
   CM: {
     name: 'République du Cameroun',
     flag: '🇨🇲',
     region: 'Afrique Centrale',
     legalSystem: 'Mixed (Civil/Common)',
-    texts: 35,
+    texts: 0,
   },
 };
 
@@ -212,72 +212,11 @@ const country = countryData[code] ?? {
   texts: 0,
 };
 
-const themesCovered = 8;
-const verifiedCount = Math.floor((country.texts ?? 0) * 0.7);
+const themesCovered = 0;
+const verifiedCount = 0;
 
-// Mock legal texts
-const mockTexts = [
-  {
-    id: '101',
-    title: `Constitution de la ${country.name || 'République'}`,
-    date: '22 nov. 1990',
-    type: 'Constitution',
-    isInForce: true,
-    isVerified: true,
-    themes: ['Constitution', 'Droit constitutionnel'],
-    themeSlug: 'constitution',
-  },
-  {
-    id: '102',
-    title: `Code pénal de la ${country.name || 'République'}`,
-    date: '15 jan. 2012',
-    type: 'Loi',
-    isInForce: true,
-    isVerified: true,
-    themes: ['Droit pénal', 'Procédure pénale'],
-    themeSlug: 'droit-penal',
-  },
-  {
-    id: '103',
-    title: `Loi portant Code du travail`,
-    date: '03 avr. 2017',
-    type: 'Loi',
-    isInForce: true,
-    isVerified: false,
-    themes: ['Droit du travail', 'Sécurité sociale'],
-    themeSlug: 'droit-travail',
-  },
-  {
-    id: '104',
-    title: `Décret portant règlementation des marchés publics`,
-    date: '28 juil. 2020',
-    type: 'Décret',
-    isInForce: true,
-    isVerified: true,
-    themes: ['Marchés publics'],
-    themeSlug: 'marches-publics',
-  },
-  {
-    id: '105',
-    title: `Loi relative à la protection des données personnelles`,
-    date: '12 oct. 2022',
-    type: 'Loi',
-    isInForce: true,
-    isVerified: true,
-    themes: ['Protection des données', 'Numérique & Télécoms'],
-    themeSlug: 'donnees-personnelles',
-  },
-  {
-    id: '106',
-    title: `Loi portant Code de l'environnement`,
-    date: '19 fév. 2019',
-    type: 'Loi',
-    isInForce: false,
-    isVerified: false,
-    themes: ['Environnement', 'Biodiversité'],
-    themeSlug: 'environnement',
-  },
-];
+// Legal texts — populated from API
+const mockTexts: any[] = [];
 
 // Filters
 const selectedTheme = ref<string | null>(null);

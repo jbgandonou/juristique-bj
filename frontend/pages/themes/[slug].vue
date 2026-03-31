@@ -181,58 +181,58 @@ interface ThemeData {
 
 const themeMap: Record<string, ThemeData> = {
   // Droit public
-  'constitution': { name: 'Constitution', description: 'Textes fondamentaux organisant les institutions et les droits fondamentaux', icon: ScrollText, textCount: 26 },
-  'droit-administratif': { name: 'Droit administratif', description: "Organisation et fonctionnement de l'administration publique", icon: Building2, textCount: 43 },
-  'droit-constitutionnel': { name: 'Droit constitutionnel', description: "Normes régissant l'organisation et l'exercice du pouvoir politique", icon: Scale, textCount: 18 },
-  'droit-penal': { name: 'Droit pénal', description: "Infractions, sanctions et protection de l'ordre social", icon: Gavel, textCount: 28 },
-  'procedure-penale': { name: 'Procédure pénale', description: 'Règles gouvernant les poursuites judiciaires en matière pénale', icon: Scale, textCount: 21 },
-  'droit-fiscal': { name: 'Droit fiscal', description: 'Règles régissant les impôts, taxes et contributions', icon: Receipt, textCount: 57 },
-  'droit-douanier': { name: 'Droit douanier', description: 'Réglementation des importations, exportations et droits de douane', icon: Truck, textCount: 32 },
-  'droit-electoral': { name: 'Droit électoral', description: 'Règles organisant les élections et la participation citoyenne', icon: Users, textCount: 19 },
-  'marches-publics': { name: 'Marchés publics', description: 'Passation et exécution des contrats publics de fournitures et services', icon: Briefcase, textCount: 36 },
-  'droit-foncier': { name: 'Droit foncier', description: "Régimes de propriété et d'exploitation des terres", icon: Home, textCount: 44 },
+  'constitution': { name: 'Constitution', description: 'Textes fondamentaux organisant les institutions et les droits fondamentaux', icon: ScrollText, textCount: 0 },
+  'droit-administratif': { name: 'Droit administratif', description: "Organisation et fonctionnement de l'administration publique", icon: Building2, textCount: 0 },
+  'droit-constitutionnel': { name: 'Droit constitutionnel', description: "Normes régissant l'organisation et l'exercice du pouvoir politique", icon: Scale, textCount: 0 },
+  'droit-penal': { name: 'Droit pénal', description: "Infractions, sanctions et protection de l'ordre social", icon: Gavel, textCount: 0 },
+  'procedure-penale': { name: 'Procédure pénale', description: 'Règles gouvernant les poursuites judiciaires en matière pénale', icon: Scale, textCount: 0 },
+  'droit-fiscal': { name: 'Droit fiscal', description: 'Règles régissant les impôts, taxes et contributions', icon: Receipt, textCount: 0 },
+  'droit-douanier': { name: 'Droit douanier', description: 'Réglementation des importations, exportations et droits de douane', icon: Truck, textCount: 0 },
+  'droit-electoral': { name: 'Droit électoral', description: 'Règles organisant les élections et la participation citoyenne', icon: Users, textCount: 0 },
+  'marches-publics': { name: 'Marchés publics', description: 'Passation et exécution des contrats publics de fournitures et services', icon: Briefcase, textCount: 0 },
+  'droit-foncier': { name: 'Droit foncier', description: "Régimes de propriété et d'exploitation des terres", icon: Home, textCount: 0 },
 
   // Droit des affaires
-  'droit-affaires-ohada': { name: 'Droit des affaires', description: 'Textes OHADA et règlements relatifs au commerce et aux entreprises', icon: Briefcase, textCount: 45 },
-  'droit-societes': { name: 'Droit des sociétés', description: 'Constitution, fonctionnement et dissolution des sociétés commerciales', icon: Building2, textCount: 38 },
-  'droit-bancaire': { name: 'Droit bancaire', description: 'Régulation des établissements de crédit et des opérations bancaires', icon: Landmark, textCount: 31 },
-  'droit-assurances': { name: 'Droit des assurances', description: 'Contrats, entreprises et réglementation du secteur assurantiel', icon: ShieldIcon, textCount: 24 },
-  'droit-concurrence': { name: 'Droit de la concurrence', description: 'Pratiques anticoncurrentielles, abus de position et ententes', icon: Scale, textCount: 17 },
-  'commerce-international': { name: 'Commerce international', description: 'Règles régissant les échanges commerciaux transfrontaliers', icon: Globe, textCount: 29 },
-  'droit-contrats': { name: 'Droit des contrats', description: 'Formation, exécution et résiliation des obligations contractuelles', icon: ScrollText, textCount: 33 },
-  'propriete-intellectuelle': { name: 'Propriété intellectuelle', description: "Protection des créations de l'esprit, marques et brevets", icon: ShieldIcon, textCount: 22 },
-  'microfinance-umoa': { name: 'Microfinance & UMOA', description: 'Institutions de microfinance et réglementation monétaire UEMOA', icon: Banknote, textCount: 16 },
+  'droit-affaires-ohada': { name: 'Droit des affaires', description: 'Textes OHADA et règlements relatifs au commerce et aux entreprises', icon: Briefcase, textCount: 0 },
+  'droit-societes': { name: 'Droit des sociétés', description: 'Constitution, fonctionnement et dissolution des sociétés commerciales', icon: Building2, textCount: 0 },
+  'droit-bancaire': { name: 'Droit bancaire', description: 'Régulation des établissements de crédit et des opérations bancaires', icon: Landmark, textCount: 0 },
+  'droit-assurances': { name: 'Droit des assurances', description: 'Contrats, entreprises et réglementation du secteur assurantiel', icon: ShieldIcon, textCount: 0 },
+  'droit-concurrence': { name: 'Droit de la concurrence', description: 'Pratiques anticoncurrentielles, abus de position et ententes', icon: Scale, textCount: 0 },
+  'commerce-international': { name: 'Commerce international', description: 'Règles régissant les échanges commerciaux transfrontaliers', icon: Globe, textCount: 0 },
+  'droit-contrats': { name: 'Droit des contrats', description: 'Formation, exécution et résiliation des obligations contractuelles', icon: ScrollText, textCount: 0 },
+  'propriete-intellectuelle': { name: 'Propriété intellectuelle', description: "Protection des créations de l'esprit, marques et brevets", icon: ShieldIcon, textCount: 0 },
+  'microfinance-umoa': { name: 'Microfinance & UMOA', description: 'Institutions de microfinance et réglementation monétaire UEMOA', icon: Banknote, textCount: 0 },
 
   // Droit social
-  'droit-travail': { name: 'Droit du travail', description: "Relations d'emploi, contrats de travail et conditions de travail", icon: Users, textCount: 62 },
-  'securite-sociale': { name: 'Sécurité sociale', description: 'Régimes de prévoyance, retraite et couverture sociale', icon: Heart, textCount: 27 },
-  'droit-famille': { name: 'Droit de la famille', description: 'Mariage, filiation, adoption et statut personnel', icon: Baby, textCount: 19 },
-  'droit-personnes': { name: 'Droit des personnes', description: 'Capacité juridique, état civil et droits individuels', icon: Users, textCount: 14 },
-  'sante-publique': { name: 'Santé publique', description: 'Organisation du système de santé et politiques sanitaires', icon: Stethoscope, textCount: 48 },
-  'education': { name: 'Éducation', description: "Système éducatif, établissements d'enseignement et politiques scolaires", icon: GraduationCap, textCount: 35 },
-  'logement-urbanisme': { name: 'Logement & Urbanisme', description: "Règles relatives à la construction, au logement et à l'aménagement urbain", icon: Home, textCount: 26 },
+  'droit-travail': { name: 'Droit du travail', description: "Relations d'emploi, contrats de travail et conditions de travail", icon: Users, textCount: 0 },
+  'securite-sociale': { name: 'Sécurité sociale', description: 'Régimes de prévoyance, retraite et couverture sociale', icon: Heart, textCount: 0 },
+  'droit-famille': { name: 'Droit de la famille', description: 'Mariage, filiation, adoption et statut personnel', icon: Baby, textCount: 0 },
+  'droit-personnes': { name: 'Droit des personnes', description: 'Capacité juridique, état civil et droits individuels', icon: Users, textCount: 0 },
+  'sante-publique': { name: 'Santé publique', description: 'Organisation du système de santé et politiques sanitaires', icon: Stethoscope, textCount: 0 },
+  'education': { name: 'Éducation', description: "Système éducatif, établissements d'enseignement et politiques scolaires", icon: GraduationCap, textCount: 0 },
+  'logement-urbanisme': { name: 'Logement & Urbanisme', description: "Règles relatives à la construction, au logement et à l'aménagement urbain", icon: Home, textCount: 0 },
 
   // Numérique & Tech
-  'numerique-telecoms': { name: 'Numérique & Télécoms', description: 'Régulation des communications électroniques et du secteur numérique', icon: Wifi, textCount: 52 },
-  'donnees-personnelles': { name: 'Protection des données', description: 'Collecte, traitement et protection des données à caractère personnel', icon: ShieldIcon, textCount: 34 },
-  'cybersecurite': { name: 'Cybersécurité', description: 'Sécurité des systèmes informatiques et lutte contre la cybercriminalité', icon: Cpu, textCount: 19 },
-  'commerce-electronique': { name: 'Commerce électronique', description: 'Transactions en ligne, paiements mobiles et contrats électroniques', icon: Phone, textCount: 23 },
+  'numerique-telecoms': { name: 'Numérique & Télécoms', description: 'Régulation des communications électroniques et du secteur numérique', icon: Wifi, textCount: 0 },
+  'donnees-personnelles': { name: 'Protection des données', description: 'Collecte, traitement et protection des données à caractère personnel', icon: ShieldIcon, textCount: 0 },
+  'cybersecurite': { name: 'Cybersécurité', description: 'Sécurité des systèmes informatiques et lutte contre la cybercriminalité', icon: Cpu, textCount: 0 },
+  'commerce-electronique': { name: 'Commerce électronique', description: 'Transactions en ligne, paiements mobiles et contrats électroniques', icon: Phone, textCount: 0 },
 
   // Environnement
-  'environnement': { name: 'Environnement', description: "Protection de l'environnement, évaluation environnementale et normes", icon: Leaf, textCount: 67 },
-  'energie-electrique': { name: 'Énergie électrique', description: "Production, transport et distribution de l'électricité", icon: Bolt, textCount: 38 },
-  'energie-renouvelable': { name: 'Énergie renouvelable', description: 'Développement et promotion des énergies solaire, éolienne et hydraulique', icon: Sun, textCount: 21 },
-  'gestion-dechets': { name: 'Gestion des déchets', description: 'Collecte, traitement et valorisation des déchets', icon: TreePine, textCount: 15 },
-  'ressources-eau': { name: 'Ressources en eau', description: 'Gestion, accès et protection des ressources hydriques', icon: Droplets, textCount: 29 },
-  'biodiversite': { name: 'Biodiversité', description: 'Conservation des écosystèmes, faune et flore', icon: TreePine, textCount: 18 },
-  'mines-ressources': { name: 'Mines & Ressources', description: 'Extraction, exploitation et fiscalité des ressources minières', icon: Mountain, textCount: 41 },
+  'environnement': { name: 'Environnement', description: "Protection de l'environnement, évaluation environnementale et normes", icon: Leaf, textCount: 0 },
+  'energie-electrique': { name: 'Énergie électrique', description: "Production, transport et distribution de l'électricité", icon: Bolt, textCount: 0 },
+  'energie-renouvelable': { name: 'Énergie renouvelable', description: 'Développement et promotion des énergies solaire, éolienne et hydraulique', icon: Sun, textCount: 0 },
+  'gestion-dechets': { name: 'Gestion des déchets', description: 'Collecte, traitement et valorisation des déchets', icon: TreePine, textCount: 0 },
+  'ressources-eau': { name: 'Ressources en eau', description: 'Gestion, accès et protection des ressources hydriques', icon: Droplets, textCount: 0 },
+  'biodiversite': { name: 'Biodiversité', description: 'Conservation des écosystèmes, faune et flore', icon: TreePine, textCount: 0 },
+  'mines-ressources': { name: 'Mines & Ressources', description: 'Extraction, exploitation et fiscalité des ressources minières', icon: Mountain, textCount: 0 },
 
   // Secteurs
-  'agriculture': { name: 'Agriculture', description: 'Production agricole, foncier rural et politiques agro-alimentaires', icon: Wheat, textCount: 53 },
-  'elevage': { name: 'Élevage', description: 'Santé animale, production et commerce du bétail', icon: Beef, textCount: 31 },
-  'peche': { name: 'Pêche', description: 'Ressources halieutiques, pêche artisanale et aquaculture', icon: Fish, textCount: 24 },
-  'transport': { name: 'Transport & Aviation', description: 'Règles applicables aux transports terrestres, aériens et maritimes', icon: Plane, textCount: 37 },
-  'industrie': { name: 'Industrie', description: 'Règlementation industrielle, normes et politiques de développement', icon: Factory, textCount: 28 },
+  'agriculture': { name: 'Agriculture', description: 'Production agricole, foncier rural et politiques agro-alimentaires', icon: Wheat, textCount: 0 },
+  'elevage': { name: 'Élevage', description: 'Santé animale, production et commerce du bétail', icon: Beef, textCount: 0 },
+  'peche': { name: 'Pêche', description: 'Ressources halieutiques, pêche artisanale et aquaculture', icon: Fish, textCount: 0 },
+  'transport': { name: 'Transport & Aviation', description: 'Règles applicables aux transports terrestres, aériens et maritimes', icon: Plane, textCount: 0 },
+  'industrie': { name: 'Industrie', description: 'Règlementation industrielle, normes et politiques de développement', icon: Factory, textCount: 0 },
 };
 
 const theme: ThemeData = themeMap[slug] ?? {
@@ -242,78 +242,11 @@ const theme: ThemeData = themeMap[slug] ?? {
   textCount: 0,
 };
 
-const countriesCovered = 12;
-const typeBreakdown = { lois: Math.floor((theme.textCount ?? 0) * 0.6), decrets: Math.floor((theme.textCount ?? 0) * 0.4) };
+const countriesCovered = 0;
+const typeBreakdown = { lois: 0, decrets: 0 };
 
-// Mock legal texts for this theme
-const mockTexts = [
-  {
-    id: '201',
-    title: `Loi n°2024-15 portant réglementation en matière de ${theme.name}`,
-    country: 'Bénin',
-    countryCode: 'BJ',
-    date: '15 mars 2024',
-    type: 'Loi',
-    isInForce: true,
-    isVerified: true,
-    themes: [theme.name],
-  },
-  {
-    id: '202',
-    title: `Acte uniforme OHADA relatif au domaine de ${theme.name}`,
-    country: 'OHADA (17 pays)',
-    countryCode: 'OHADA',
-    date: '15 déc. 2010',
-    type: 'Acte uniforme',
-    isInForce: true,
-    isVerified: true,
-    themes: [theme.name, 'Droit des affaires'],
-  },
-  {
-    id: '203',
-    title: `Loi n°2023-08 relative à ${theme.name} au Togo`,
-    country: 'Togo',
-    countryCode: 'TG',
-    date: '22 juin 2023',
-    type: 'Loi',
-    isInForce: true,
-    isVerified: false,
-    themes: [theme.name],
-  },
-  {
-    id: '204',
-    title: `Décret n°2022-301 portant application de la loi sur ${theme.name}`,
-    country: 'Sénégal',
-    countryCode: 'SN',
-    date: '07 nov. 2022',
-    type: 'Décret',
-    isInForce: true,
-    isVerified: true,
-    themes: [theme.name],
-  },
-  {
-    id: '205',
-    title: `Loi n°2019-054 portant Code de ${theme.name}`,
-    country: "Côte d'Ivoire",
-    countryCode: 'CI',
-    date: '19 fév. 2019',
-    type: 'Loi',
-    isInForce: false,
-    isVerified: false,
-    themes: [theme.name],
-  },
-  {
-    id: '206',
-    title: `Ordonnance portant organisation de ${theme.name} au Cameroun`,
-    country: 'Cameroun',
-    countryCode: 'CM',
-    date: '10 mai 2018',
-    type: 'Ordonnance',
-    isInForce: true,
-    isVerified: true,
-    themes: [theme.name],
-  },
-];
+// Legal texts — populated from API
+const mockTexts: any[] = [];
 
 // Filters
 const selectedCountry = ref<string | null>(null);

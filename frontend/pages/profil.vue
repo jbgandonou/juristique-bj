@@ -395,10 +395,10 @@ const { getLegalTexts } = useApi();
 
 // ── User data ────────────────────────────────────────────────────
 const user = computed(() => ({
-  name: authUser.value?.fullName || 'Madeleine Ahouansou',
-  profession: authUser.value?.profession || 'Avocate au Barreau du Bénin',
-  country: authUser.value?.country?.name || authUser.value?.country || 'Bénin',
-  memberSince: 'janvier 2024',
+  name: authUser.value?.fullName || '',
+  profession: authUser.value?.profession || '',
+  country: authUser.value?.country?.name || authUser.value?.country || '',
+  memberSince: '',
 }));
 
 const userInitials = computed(() => {
@@ -414,45 +414,14 @@ const userInitials = computed(() => {
 const activeTab = ref('favoris');
 
 const tabs = [
-  { key: 'favoris', label: 'Mes favoris', icon: Bookmark, count: 3 },
-  { key: 'commentaires', label: 'Mes commentaires', icon: MessageSquare, count: 3 },
-  { key: 'alertes', label: 'Mes alertes', icon: Bell, count: 3 },
+  { key: 'favoris', label: 'Mes favoris', icon: Bookmark, count: 0 },
+  { key: 'commentaires', label: 'Mes commentaires', icon: MessageSquare, count: 0 },
+  { key: 'alertes', label: 'Mes alertes', icon: Bell, count: 0 },
   { key: 'parametres', label: 'Paramètres', icon: Settings },
 ];
 
 // ── Bookmarks ───────────────────────────────────────────────────
-const bookmarks = ref([
-  {
-    id: '1',
-    title: 'Loi n°2024-15 portant Code du numérique en République du Bénin',
-    country: 'Bénin',
-    date: '15 mars 2024',
-    type: 'Loi',
-    isInForce: true,
-    themes: ['Numérique', 'Données personnelles'],
-    note: 'À analyser pour le dossier client Tech-Innov SA.',
-  },
-  {
-    id: '2',
-    title: 'Acte uniforme révisé relatif au droit commercial général (AUDCG)',
-    country: 'OHADA (17 pays)',
-    date: '15 déc. 2010',
-    type: 'Acte uniforme',
-    isInForce: true,
-    themes: ['Droit des affaires'],
-    note: 'Référence pour les clauses contractuelles OHADA.',
-  },
-  {
-    id: '3',
-    title: 'Loi n°2023-08 relative à l\'énergie électrique au Togo',
-    country: 'Togo',
-    date: '22 juin 2023',
-    type: 'Loi',
-    isInForce: true,
-    themes: ['Énergie électrique', 'Énergie renouvelable'],
-    note: null,
-  },
-]);
+const bookmarks = ref<any[]>([]);
 
 onMounted(async () => {
   // Redirect to login if not authenticated
@@ -530,42 +499,13 @@ const removeBookmark = (id: string) => {
 };
 
 // ── Comments ────────────────────────────────────────────────────
-const comments = ref([
-  {
-    id: 'c1',
-    textId: '1',
-    textTitle: 'Loi n°2024-15 portant Code du numérique en République du Bénin',
-    content: 'L\'article 43 sur la protection des données personnelles crée une obligation de notification en cas de violation, alignée sur le RGPD. Il conviendra d\'adapter les politiques internes en conséquence.',
-    date: '18 mars 2024',
-    type: 'Analyse',
-  },
-  {
-    id: 'c2',
-    textId: '2',
-    textTitle: 'Acte uniforme révisé relatif au droit commercial général (AUDCG)',
-    content: 'La révision de 2010 a introduit le statut de l\'entreprenant, particulièrement pertinent pour les micro-entreprises. Les formalités simplifiées facilitent grandement la formalisation des activités informelles.',
-    date: '05 fév. 2024',
-    type: 'Commentaire',
-  },
-  {
-    id: 'c3',
-    textId: '4',
-    textTitle: 'Constitution de la République du Sénégal',
-    content: 'Le préambule de la Constitution de 2001 affirme l\'attachement au principe de laïcité tout en reconnaissant la primauté des droits fondamentaux. Une tension intéressante à explorer dans le contexte régional.',
-    date: '12 jan. 2024',
-    type: 'Note',
-  },
-]);
+const comments = ref<any[]>([]);
 
 // ── Alerts ──────────────────────────────────────────────────────
 const showCreateAlert = ref(false);
 const newAlert = ref({ theme: '', country: '', frequency: 'Hebdomadaire' });
 
-const alerts = ref([
-  { id: 'a1', theme: 'Énergie électrique', country: 'Bénin', frequency: 'Quotidien', active: true },
-  { id: 'a2', theme: 'Numérique & Télécoms', country: '', frequency: 'Hebdomadaire', active: true },
-  { id: 'a3', theme: 'Droit des affaires (OHADA)', country: '', frequency: 'Mensuel', active: false },
-]);
+const alerts = ref<any[]>([]);
 
 const activeAlertsCount = computed(() => alerts.value.filter(a => a.active).length);
 
@@ -594,11 +534,11 @@ const createAlert = () => {
 
 // ── Settings Form ───────────────────────────────────────────────
 const form = ref({
-  name: 'Madeleine Ahouansou',
-  email: 'madeleine.ahouansou@cabinet-legal.bj',
-  profession: 'Avocat',
-  country: 'Bénin',
-  barNumber: 'BJ-AVT-2019-0127',
+  name: '',
+  email: '',
+  profession: '',
+  country: '',
+  barNumber: '',
 });
 
 const security = ref({

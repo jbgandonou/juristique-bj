@@ -90,23 +90,17 @@ export class ConstitutionsScraper extends BaseScraper {
   private async scrapeConstitution(source: ConstitutionSource): Promise<ScrapedText | null> {
     for (const url of source.urls) {
       try {
-        const html = await this.fetchPage(url, {
+        // Fetch as arraybuffer to handle ISO-8859-1 encoding (common on MJP)
+        const response = await this.fetchPage(url, {
           responseType: 'arraybuffer',
-        });
-        // Handle ISO-8859-1 encoding (common on MJP)
-        let htmlStr: string;
-        if (Buffer.isBuffer(html) || html instanceof ArrayBuffer) {
-          const buf = Buffer.isBuffer(html) ? html : Buffer.from(html);
-          // Check if page declares ISO-8859-1
-          const rawStr = buf.toString('latin1');
-          if (rawStr.toLowerCase().includes('iso-8859-1') || rawStr.toLowerCase().includes('latin1')) {
-            htmlStr = buf.toString('latin1');
-          } else {
-            htmlStr = buf.toString('utf-8');
-          }
-        } else {
-          htmlStr = html as unknown as string;
-        }
+          responseEncoding: 'binary',
+        } as any);
+        const buf = Buffer.from(response, 'binary');
+        // Check if page declares ISO-8859-1 encoding
+        const probe = buf.toString('ascii').substring(0, 1000).toLowerCase();
+        const htmlStr = (probe.includes('iso-8859-1') || probe.includes('latin1'))
+          ? buf.toString('latin1')
+          : buf.toString('utf-8');
         const $ = cheerio.load(htmlStr);
 
         let content = '';

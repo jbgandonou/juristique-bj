@@ -10,6 +10,8 @@ import { ConstituteScraper } from './scrapers/constitute.scraper';
 import { FaolexScraper } from './scrapers/faolex.scraper';
 import { OhadaScraper } from './scrapers/ohada.scraper';
 import { ScrapedText } from './scrapers/scraper.interface';
+import { BaseScraper } from './scrapers/base.scraper';
+import { PipelineAlertsService } from './pipeline-alerts.service';
 
 @Processor('pipeline', { concurrency: 1 })
 export class PipelineProcessor extends WorkerHost {
@@ -25,6 +27,7 @@ export class PipelineProcessor extends WorkerHost {
     private readonly constituteScraper: ConstituteScraper,
     private readonly faolexScraper: FaolexScraper,
     private readonly ohadaScraper: OhadaScraper,
+    private readonly alertsService: PipelineAlertsService,
   ) {
     super();
   }
@@ -43,7 +46,12 @@ export class PipelineProcessor extends WorkerHost {
       // Stage 1: Scraping
       await this.updateStatus(pipelineJob, JobStatus.SCRAPING);
       const scraper = this.getScraper(sourceName);
+      scraper.clearAlerts();
       const scrapedTexts = await scraper.scrape();
+      const alerts = scraper.getAlerts();
+      if (alerts.length > 0) {
+        await this.alertsService.createFromScraper(pipelineJobId, alerts);
+      }
       this.logger.log(`Scraped ${scrapedTexts.length} texts from ${sourceName}`);
 
       // Stage 2: Extracting (cleanup/validation)
@@ -69,7 +77,7 @@ export class PipelineProcessor extends WorkerHost {
     }
   }
 
-  private getScraper(sourceName: string) {
+  private getScraper(sourceName: string): BaseScraper {
     switch (sourceName) {
       case 'Constitute Project':
         return this.constituteScraper;

@@ -14,6 +14,7 @@ export enum TextType {
   ARRETE = 'arrete',
   TRAITE = 'traite',
   ACTE_UNIFORME = 'acte_uniforme',
+  JURISPRUDENCE = 'jurisprudence',
 }
 
 export enum TextStatus {

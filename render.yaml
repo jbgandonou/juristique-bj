@@ -27,3 +27,7 @@ services:
         sync: false
       - key: APP_URL
         sync: false
+      - key: DB_SYNCHRONIZE
+        value: "true"
+      - key: ADMIN_SECRET
+        sync: false

@@ -23,7 +23,7 @@ export class PipelineAlertsService {
         type: alert.type,
         severity: alert.severity,
         message: alert.message,
-        metadata: alert.metadata ?? null,
+        metadata: alert.metadata ?? undefined,
         acknowledged: false,
       }),
     );

@@ -4,7 +4,7 @@
     <div class="page-header fade-in-up">
       <div class="page-header-left">
         <h2 class="page-title">Queue éditoriale</h2>
-        <span class="count-badge">{{ filteredRows.length }} textes</span>
+        <span class="count-badge">{{ totalCount }} textes ({{ filteredRows.length }} affichés)</span>
       </div>
       <div class="page-header-actions">
         <Button
@@ -142,6 +142,13 @@
           </template>
         </Column>
       </DataTable>
+
+      <!-- Server-side pagination -->
+      <div v-if="totalPages > 1" class="server-pagination">
+        <button :disabled="currentPage <= 1" @click="goToPage(currentPage - 1)" class="page-btn">← Précédent</button>
+        <span class="page-info">Page {{ currentPage }} / {{ totalPages }} ({{ totalCount }} textes au total)</span>
+        <button :disabled="currentPage >= totalPages" @click="goToPage(currentPage + 1)" class="page-btn">Suivant →</button>
+      </div>
     </div>
   </div>
 </template>
@@ -165,6 +172,7 @@ const filterCountry = ref('');
 const filterStatus = ref('');
 
 const rows = ref<any[]>([]);
+const totalCount = ref(0);
 
 const typeLabels: Record<string, string> = {
   constitution: 'Constitution',
@@ -180,21 +188,7 @@ const typeLabels: Record<string, string> = {
 
 onMounted(async () => {
   try {
-    const res = await getLegalTextsByStatus('pending_review', 1, 50);
-    if (res.data?.length) {
-      rows.value = res.data.map((t: any) => ({
-        id: t.id,
-        title: t.title,
-        type: typeLabels[t.textType] ?? t.textType ?? '—',
-        country: t.country?.name ?? '—',
-        source: t.sourceName ?? '—',
-        ocrScore: t.ocrQuality ?? null,
-        date: (t.promulgationDate || t.publicationDate)
-          ? new Date(t.promulgationDate || t.publicationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
-          : '—',
-        status: t.status,
-      }));
-    }
+    await fetchQueue();
   } catch (e) {
     console.log('Queue API not available');
     rows.value = [];
@@ -202,6 +196,43 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+const currentPage = ref(1);
+const pageSize = ref(100);
+
+const fetchQueue = async () => {
+  const res = await getLegalTextsByStatus('pending_review', currentPage.value, pageSize.value);
+  totalCount.value = res.total ?? 0;
+  if (res.data?.length) {
+    rows.value = res.data.map((t: any) => ({
+      id: t.id,
+      title: t.title,
+      type: typeLabels[t.textType] ?? t.textType ?? '—',
+      country: t.country?.name ?? '—',
+      source: t.sourceName ?? '—',
+      ocrScore: t.ocrQuality ?? null,
+      date: (t.promulgationDate || t.publicationDate)
+        ? new Date(t.promulgationDate || t.publicationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+        : '—',
+      status: t.status,
+    }));
+  } else {
+    rows.value = [];
+  }
+};
+
+const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value));
+
+const goToPage = async (page: number) => {
+  if (page < 1 || page > totalPages.value) return;
+  currentPage.value = page;
+  loading.value = true;
+  try {
+    await fetchQueue();
+  } finally {
+    loading.value = false;
+  }
+};
 
 const filteredRows = computed(() =>
   rows.value.filter((r) => {
@@ -505,5 +536,39 @@ const ocrScoreClass = (score: number) => {
   .filter-reset {
     align-self: flex-start;
   }
+}
+
+.server-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+}
+
+.page-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary, #e2e8f0);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 0.85rem;
+  color: var(--text-muted, #94a3b8);
 }
 </style>

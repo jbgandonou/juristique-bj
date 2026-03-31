@@ -24,8 +24,7 @@ export class OhadaScraper extends BaseScraper {
 
   private readonly SECTIONS = [
     { path: '/actes-uniformes/', type: TextType.ACTE_UNIFORME, label: 'Actes Uniformes' },
-    { path: '/reglements/', type: TextType.LOI, label: 'Règlements' },
-    { path: '/decisions/', type: TextType.LOI, label: 'Décisions' },
+    { path: '/reglements-decisions/', type: TextType.LOI, label: 'Règlements et Décisions' },
   ];
 
   async collect(): Promise<ScrapedText[]> {

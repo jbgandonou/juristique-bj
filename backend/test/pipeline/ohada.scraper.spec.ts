@@ -27,11 +27,10 @@ describe('OhadaScraper', () => {
     expect(parseDate('no date here')).toBeUndefined();
   });
 
-  it('should have 3 sections to scrape', () => {
+  it('should have 2 sections to scrape', () => {
     const sections = (scraper as any).SECTIONS;
-    expect(sections.length).toBe(3);
+    expect(sections.length).toBe(2);
     expect(sections[0].label).toBe('Actes Uniformes');
-    expect(sections[1].label).toBe('Règlements');
-    expect(sections[2].label).toBe('Décisions');
+    expect(sections[1].label).toBe('Règlements et Décisions');
   });
 });

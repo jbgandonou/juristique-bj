@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { PipelineService } from './pipeline.service';
 import { CreatePipelineJobDto, CreateSourceConfigDto } from './dto/create-pipeline-job.dto';
@@ -19,6 +19,24 @@ export class PipelineController {
   @ApiOperation({ summary: 'List pipeline jobs' })
   findAllJobs(@Query() pagination: PaginationDto) {
     return this.service.findAllJobs(pagination);
+  }
+
+  @Get('jobs/:id')
+  @ApiOperation({ summary: 'Get a single pipeline job' })
+  findOneJob(@Param('id') id: string) {
+    return this.service.findOneJob(id);
+  }
+
+  @Patch('jobs/:id/cancel')
+  @ApiOperation({ summary: 'Cancel a pipeline job' })
+  cancelJob(@Param('id') id: string) {
+    return this.service.cancelJob(id);
+  }
+
+  @Delete('jobs/:id')
+  @ApiOperation({ summary: 'Delete a pipeline job' })
+  deleteJob(@Param('id') id: string) {
+    return this.service.deleteJob(id);
   }
 
   @Post('sources')

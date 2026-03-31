@@ -50,7 +50,16 @@ export class PipelineProcessor extends WorkerHost {
 
     try {
       // Stage 1: Scraping
-      await this.updateStatus(pipelineJob, JobStatus.SCRAPING);
+      await this.jobRepo.update(pipelineJobId, {
+        status: JobStatus.SCRAPING,
+        startedAt: new Date(),
+        metadataJson: { progress: 10, stage: 'Scraping texts from source...' } as Record<string, any>,
+      });
+
+      if (await this.isJobCancelled(pipelineJobId)) {
+        return;
+      }
+
       const scraper = this.getScraper(sourceName);
       scraper.clearAlerts();
       const scrapedTexts = await scraper.scrape();
@@ -60,26 +69,46 @@ export class PipelineProcessor extends WorkerHost {
       }
       this.logger.log(`Scraped ${scrapedTexts.length} texts from ${sourceName}`);
 
+      if (await this.isJobCancelled(pipelineJobId)) {
+        return;
+      }
+
       // Stage 2: Extracting (cleanup/validation)
-      await this.updateStatus(pipelineJob, JobStatus.EXTRACTING);
+      await this.jobRepo.update(pipelineJobId, {
+        status: JobStatus.EXTRACTING,
+        metadataJson: { progress: 40, stage: `Validating ${scrapedTexts.length} texts...`, scrapedCount: scrapedTexts.length } as Record<string, any>,
+      });
       const validTexts = scrapedTexts.filter((t) => t.title && t.countryCodes.length > 0);
       this.logger.log(`${validTexts.length} valid texts after filtering`);
 
+      if (await this.isJobCancelled(pipelineJobId)) {
+        return;
+      }
+
       // Stage 3: Enriching (country matching + dedup + create LegalText)
-      await this.updateStatus(pipelineJob, JobStatus.ENRICHING);
+      await this.jobRepo.update(pipelineJobId, {
+        status: JobStatus.ENRICHING,
+        metadataJson: { progress: 60, stage: `Creating ${validTexts.length} legal texts...`, validCount: validTexts.length } as Record<string, any>,
+      });
       const created = await this.createLegalTexts(validTexts);
       this.logger.log(`Created ${created} new legal texts`);
 
       // Done
-      pipelineJob.textsCount = created;
-      pipelineJob.completedAt = new Date();
-      await this.updateStatus(pipelineJob, JobStatus.READY_FOR_REVIEW);
+      await this.jobRepo.update(pipelineJobId, {
+        status: JobStatus.READY_FOR_REVIEW,
+        textsCount: created,
+        completedAt: new Date(),
+        metadataJson: { progress: 100, stage: 'Complete', textsCreated: created } as Record<string, any>,
+      });
 
     } catch (err) {
       this.logger.error(`Job ${pipelineJobId} failed: ${err.message}`, err.stack);
-      pipelineJob.errorMessage = err.message?.substring(0, 2000);
-      pipelineJob.completedAt = new Date();
-      await this.updateStatus(pipelineJob, JobStatus.FAILED);
+      await this.jobRepo.update(pipelineJobId, {
+        status: JobStatus.FAILED,
+        errorMessage: (err as Error).message?.substring(0, 2000),
+        completedAt: new Date(),
+        metadataJson: { progress: 0, stage: 'Failed', error: (err as Error).message?.substring(0, 500) } as Record<string, any>,
+      });
     }
   }
 
@@ -102,12 +131,9 @@ export class PipelineProcessor extends WorkerHost {
     }
   }
 
-  private async updateStatus(pipelineJob: PipelineJob, status: JobStatus) {
-    pipelineJob.status = status;
-    if (status === JobStatus.SCRAPING && !pipelineJob.startedAt) {
-      pipelineJob.startedAt = new Date();
-    }
-    await this.jobRepo.save(pipelineJob);
+  private async isJobCancelled(jobId: string): Promise<boolean> {
+    const job = await this.jobRepo.findOneBy({ id: jobId });
+    return job?.status === JobStatus.FAILED && job?.errorMessage === 'Cancelled by admin';
   }
 
   private async createLegalTexts(texts: ScrapedText[]): Promise<number> {

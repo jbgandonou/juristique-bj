@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Repository } from 'typeorm';
 import { Queue } from 'bullmq';
-import { PipelineJob } from './entities/pipeline-job.entity';
+import { PipelineJob, JobStatus } from './entities/pipeline-job.entity';
 import { SourceConfig } from './entities/source-config.entity';
 import { CreatePipelineJobDto, CreateSourceConfigDto } from './dto/create-pipeline-job.dto';
 import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
@@ -61,5 +61,25 @@ export class PipelineService {
 
   async findAllSources(): Promise<SourceConfig[]> {
     return this.sourceRepo.find({ order: { name: 'ASC' } });
+  }
+
+  async findOneJob(id: string): Promise<PipelineJob> {
+    return this.jobRepo.findOneByOrFail({ id });
+  }
+
+  async cancelJob(id: string): Promise<PipelineJob> {
+    const job = await this.jobRepo.findOneByOrFail({ id });
+    if (job.status === JobStatus.QUEUED || job.status === JobStatus.SCRAPING ||
+        job.status === JobStatus.EXTRACTING || job.status === JobStatus.ENRICHING) {
+      job.status = JobStatus.FAILED;
+      job.errorMessage = 'Cancelled by admin';
+      job.completedAt = new Date();
+      return this.jobRepo.save(job);
+    }
+    return job;
+  }
+
+  async deleteJob(id: string): Promise<void> {
+    await this.jobRepo.delete(id);
   }
 }

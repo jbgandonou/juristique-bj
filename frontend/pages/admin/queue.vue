@@ -89,7 +89,7 @@
 
         <Column field="ocrScore" header="Score OCR" style="min-width: 110px;">
           <template #body="{ data }">
-            <div class="ocr-score-wrapper">
+            <div v-if="data.ocrScore !== null" class="ocr-score-wrapper">
               <span
                 class="ocr-score"
                 :class="ocrScoreClass(data.ocrScore)"
@@ -102,6 +102,7 @@
                 ></div>
               </div>
             </div>
+            <span v-else class="ocr-score">—</span>
           </template>
         </Column>
 
@@ -165,6 +166,18 @@ const filterStatus = ref('');
 
 const rows = ref<any[]>([]);
 
+const typeLabels: Record<string, string> = {
+  constitution: 'Constitution',
+  loi_organique: 'Loi organique',
+  loi: 'Loi',
+  ordonnance: 'Ordonnance',
+  decret: 'Décret',
+  arrete: 'Arrêté',
+  traite: 'Traité',
+  acte_uniforme: 'Acte uniforme',
+  jurisprudence: 'Jurisprudence',
+};
+
 onMounted(async () => {
   try {
     const res = await getLegalTextsByStatus('pending_review', 1, 50);
@@ -172,12 +185,12 @@ onMounted(async () => {
       rows.value = res.data.map((t: any) => ({
         id: t.id,
         title: t.title,
-        type: t.textType ?? '—',
+        type: typeLabels[t.textType] ?? t.textType ?? '—',
         country: t.country?.name ?? '—',
         source: t.sourceName ?? '—',
-        ocrScore: t.ocrScore ?? 80,
-        date: t.publicationDate
-          ? new Date(t.publicationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+        ocrScore: t.ocrQuality ?? null,
+        date: (t.promulgationDate || t.publicationDate)
+          ? new Date(t.promulgationDate || t.publicationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
           : '—',
         status: t.status,
       }));

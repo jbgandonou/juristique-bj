@@ -122,7 +122,8 @@ export class FaolexScraper extends BaseScraper {
     }
 
     const typeStr = fields.typeOfTextCode ?? '';
-    const textType = this.mapTextType(typeStr);
+    // Detect type from French title first
+    const textType = this.detectTextTypeFromTitle(title) ?? this.mapTextType(typeStr);
     const abstract = fields.abstract ?? '';
 
     return {
@@ -137,6 +138,17 @@ export class FaolexScraper extends BaseScraper {
       language: 'fr',
       reference: faolexId ? `FAOLEX-${faolexId}` : undefined,
     };
+  }
+
+  private detectTextTypeFromTitle(title: string): TextType | null {
+    const lower = title.toLowerCase();
+    if (lower.startsWith('décret') || lower.startsWith('decret')) return TextType.DECRET;
+    if (lower.startsWith('arrêté') || lower.startsWith('arrete') || lower.startsWith('arrêt')) return TextType.ARRETE;
+    if (lower.startsWith('ordonnance')) return TextType.ORDONNANCE;
+    if (lower.includes('loi organique')) return TextType.LOI_ORGANIQUE;
+    if (lower.startsWith('loi')) return TextType.LOI;
+    if (lower.startsWith('constitution')) return TextType.CONSTITUTION;
+    return null;
   }
 
   private mapTextType(faoType: string): TextType {

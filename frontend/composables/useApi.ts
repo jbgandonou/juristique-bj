@@ -109,6 +109,14 @@ export const useApi = () => {
   const createPipelineJob = (sourceName: string, sourceUrl?: string) =>
     apiFetch<any>('/pipeline/jobs', { method: 'POST', body: { sourceName, sourceUrl } });
 
+  // Cancel a pipeline job
+  const cancelPipelineJob = (id: string) =>
+    apiFetch<any>(`/pipeline/jobs/${id}/cancel`, { method: 'PATCH' });
+
+  // Delete a pipeline job
+  const deletePipelineJob = (id: string) =>
+    apiFetch<void>(`/pipeline/jobs/${id}`, { method: 'DELETE' });
+
   // Pipeline sources
   const getPipelineSources = () =>
     apiFetch<any[]>('/pipeline/sources');
@@ -279,6 +287,8 @@ export const useApi = () => {
     getCommentsByText,
     getPipelineJobs,
     createPipelineJob,
+    cancelPipelineJob,
+    deletePipelineJob,
     getPipelineSources,
     getPipelineAlerts,
     getPipelineAlertCount,

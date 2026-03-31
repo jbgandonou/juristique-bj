@@ -96,15 +96,29 @@
           </template>
         </Column>
 
-        <Column field="status" header="Statut" style="min-width: 160px;">
+        <Column field="status" header="Statut" style="min-width: 180px;">
           <template #body="{ data }">
             <div class="job-status-wrapper">
               <span class="job-status-badge" :class="`job-${data.status}`">
                 <component :is="statusIcon(data.status)" :size="12" />
                 {{ statusLabel(data.status) }}
               </span>
-              <div v-if="data.status === 'scraping' || data.status === 'extracting' || data.status === 'enriching'" class="job-progress-bar">
-                <div class="job-progress-fill" :style="{ width: data.progress + '%' }"></div>
+              <div v-if="['scraping', 'extracting', 'enriching'].includes(data.status)" class="mt-2">
+                <div class="job-progress-row">
+                  <div class="job-progress-bar">
+                    <div
+                      class="job-progress-fill"
+                      :class="{
+                        'progress-scraping': data.status === 'scraping',
+                        'progress-extracting': data.status === 'extracting',
+                        'progress-enriching': data.status === 'enriching',
+                      }"
+                      :style="{ width: (data.progress || 10) + '%' }"
+                    ></div>
+                  </div>
+                  <span class="progress-pct">{{ data.progress || 0 }}%</span>
+                </div>
+                <p v-if="data.stage" class="progress-stage">{{ data.stage }}</p>
               </div>
             </div>
           </template>
@@ -124,7 +138,7 @@
           </template>
         </Column>
 
-        <Column header="Actions" style="min-width: 100px;">
+        <Column header="Actions" style="min-width: 120px;">
           <template #body="{ data }">
             <div class="job-actions">
               <button class="action-btn view" title="Voir les details" @click="openJobDetail(data)">
@@ -139,11 +153,20 @@
                 <RefreshCw :size="14" />
               </button>
               <button
-                v-if="data.status === 'queued' || data.status === 'scraping'"
+                v-if="['queued', 'scraping', 'extracting', 'enriching'].includes(data.status)"
                 class="action-btn cancel"
                 title="Annuler"
+                @click="cancelJob(data.id)"
               >
                 <StopCircle :size="14" />
+              </button>
+              <button
+                v-if="['ready_for_review', 'completed', 'failed', 'cancelled'].includes(data.status)"
+                class="action-btn delete"
+                title="Supprimer"
+                @click="deleteJob(data.id)"
+              >
+                <Trash2 :size="14" />
               </button>
             </div>
           </template>
@@ -256,10 +279,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import {
   Globe, Clock, CheckCircle, CalendarClock, RefreshCw, Settings,
-  Play, Loader, AlertTriangle, CircleCheck, Circle, Zap, Terminal, StopCircle,
+  Play, Loader, AlertTriangle, CircleCheck, Circle, Zap, Terminal, StopCircle, Trash2,
 } from 'lucide-vue-next';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -271,6 +294,8 @@ const {
   getPipelineJobs,
   getPipelineSources,
   createPipelineJob,
+  cancelPipelineJob,
+  deletePipelineJob,
   getPipelineAlerts,
   getPipelineAlertCount,
   acknowledgePipelineAlert,
@@ -292,6 +317,73 @@ const defaultSources = [
 
 const sources = ref<any[]>([...defaultSources]);
 const jobs = ref<any[]>([]);
+
+// Auto-refresh for active jobs
+let refreshInterval: ReturnType<typeof setInterval> | null = null;
+
+const mapJob = (j: any) => ({
+  id: j.id,
+  source: j.source ?? j.sourceName ?? '—',
+  status: j.status ?? 'queued',
+  started: j.startedAt
+    ? new Date(j.startedAt).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : j.started ?? '—',
+  duration: j.completedAt && j.startedAt
+    ? `${Math.round((new Date(j.completedAt).getTime() - new Date(j.startedAt).getTime()) / 1000)}s`
+    : j.durationMs != null ? `${Math.round(j.durationMs / 1000)}s` : j.duration ?? null,
+  textes: j.textsCount ?? j.textes ?? 0,
+  progress: j.metadataJson?.progress ?? j.progress ?? 0,
+  stage: j.metadataJson?.stage ?? '',
+  errorMessage: j.errorMessage ?? null,
+});
+
+const fetchJobs = async () => {
+  try {
+    const jobsRes = await getPipelineJobs(1, 20);
+    if (jobsRes.data?.length) {
+      jobs.value = jobsRes.data.map(mapJob);
+    }
+  } catch (e) {
+    console.error('Failed to fetch jobs', e);
+  }
+};
+
+const startAutoRefresh = () => {
+  if (refreshInterval) return;
+  refreshInterval = setInterval(async () => {
+    await fetchJobs();
+    const hasActive = jobs.value.some(j =>
+      ['queued', 'scraping', 'extracting', 'enriching'].includes(j.status),
+    );
+    if (!hasActive && refreshInterval) {
+      clearInterval(refreshInterval);
+      refreshInterval = null;
+    }
+  }, 5000);
+};
+
+const cancelJob = async (id: string) => {
+  try {
+    await cancelPipelineJob(id);
+    await fetchJobs();
+  } catch (e) {
+    console.error('Failed to cancel job', e);
+  }
+};
+
+const deleteJob = async (id: string) => {
+  if (!confirm('Supprimer ce job ?')) return;
+  try {
+    await deletePipelineJob(id);
+    await fetchJobs();
+  } catch (e) {
+    console.error('Failed to delete job', e);
+  }
+};
+
+onUnmounted(() => {
+  if (refreshInterval) clearInterval(refreshInterval);
+});
 
 // Alert state
 const alerts = ref<any[]>([]);
@@ -337,10 +429,7 @@ watch(alertFilter, fetchAlerts, { deep: true });
 
 onMounted(async () => {
   try {
-    const [sourcesRes, jobsRes] = await Promise.all([
-      getPipelineSources(),
-      getPipelineJobs(1, 20),
-    ]);
+    const sourcesRes = await getPipelineSources();
     if (sourcesRes?.length) {
       sources.value = sourcesRes.map((s: any) => ({
         name: s.name ?? s.slug ?? '—',
@@ -354,27 +443,13 @@ onMounted(async () => {
           : s.nextRun ?? '—',
       }));
     }
-    if (jobsRes.data?.length) {
-      jobs.value = jobsRes.data.map((j: any) => ({
-        id: j.id,
-        source: j.source ?? j.sourceName ?? '—',
-        status: j.status ?? 'queued',
-        started: j.startedAt
-          ? new Date(j.startedAt).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-          : j.started ?? '—',
-        duration: j.completedAt && j.startedAt
-          ? `${Math.round((new Date(j.completedAt).getTime() - new Date(j.startedAt).getTime()) / 1000)}s`
-          : j.durationMs != null ? `${Math.round(j.durationMs / 1000)}s` : j.duration ?? null,
-        textes: j.textsCount ?? j.textes ?? 0,
-        progress: j.progress ?? 0,
-        errorMessage: j.errorMessage ?? null,
-      }));
-    }
   } catch (e) {
-    console.log('Pipeline API not available');
-  } finally {
-    loading.value = false;
+    console.log('Pipeline sources API not available');
   }
+
+  await fetchJobs();
+  startAutoRefresh();
+  loading.value = false;
 
   // Fetch alerts independently so a failure doesn't block the rest
   await Promise.all([fetchAlerts(), fetchAlertCount()]);
@@ -422,8 +497,10 @@ const addJobToList = (job: any, sourceName: string) => {
     duration: null,
     textes: 0,
     progress: 0,
+    stage: '',
     errorMessage: null,
   });
+  startAutoRefresh();
 };
 
 const runAll = async () => {
@@ -727,7 +804,18 @@ const retryJob = async (job: any) => {
 .job-completed { background: rgba(46, 125, 50, 0.1); color: var(--juris-success); }
 .job-failed { background: rgba(198, 40, 40, 0.08); color: var(--juris-danger); }
 
+.mt-2 {
+  margin-top: 6px;
+}
+
+.job-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .job-progress-bar {
+  flex: 1;
   height: 4px;
   background: var(--juris-border-light);
   border-radius: var(--radius-full);
@@ -736,9 +824,38 @@ const retryJob = async (job: any) => {
 
 .job-progress-fill {
   height: 100%;
-  background: var(--juris-gradient-accent);
   border-radius: var(--radius-full);
-  transition: width 0.4s ease;
+  transition: width 0.5s ease;
+}
+
+.progress-scraping {
+  background: var(--juris-info, #1565c0);
+}
+
+.progress-extracting {
+  background: #3949ab;
+}
+
+.progress-enriching {
+  background: var(--juris-accent, #00897b);
+}
+
+.progress-pct {
+  font-size: var(--font-xs);
+  color: var(--juris-text-muted);
+  white-space: nowrap;
+  min-width: 28px;
+  text-align: right;
+}
+
+.progress-stage {
+  font-size: var(--font-xs);
+  color: var(--juris-text-muted);
+  margin: 3px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
 }
 
 /* Duration */
@@ -808,6 +925,15 @@ const retryJob = async (job: any) => {
 
 .action-btn.cancel:hover {
   background: rgba(198, 40, 40, 0.14);
+}
+
+.action-btn.delete {
+  background: rgba(198, 40, 40, 0.06);
+  color: var(--juris-danger);
+}
+
+.action-btn.delete:hover {
+  background: rgba(198, 40, 40, 0.18);
 }
 
 /* Job Detail Dialog */

@@ -7,10 +7,10 @@ import { TextType } from '../../legal-texts/entities/legal-text.entity';
 export class FaolexScraper extends BaseScraper {
   name = 'FAOLEX';
 
-  private readonly API_URL = 'https://faolex.fao.org/api/v1/query';
+  private readonly API_URL = 'https://fao-faolex-prod.appspot.com/api/query';
   private readonly PRIORITY_COUNTRIES = ['BEN', 'SEN', 'CIV', 'CMR', 'BFA', 'MLI'];
   private readonly MAX_PER_COUNTRY = 200;
-  private readonly PAGE_SIZE = 50;
+  private readonly PAGE_SIZE = 10;
   private readonly DELAY_MS = 2000;
 
   private readonly THEME_MAP: Record<string, string> = {
@@ -51,9 +51,11 @@ export class FaolexScraper extends BaseScraper {
       while (hasMore && start < this.MAX_PER_COUNTRY) {
         try {
           const query = this.buildQuery(iso3, start);
-          const data = await this.postJson<any>(this.API_URL, query);
+          const data = await this.postJson<any>(this.API_URL, query, {
+            headers: { 'Content-Type': 'text/plain' },
+          });
 
-          const results = data.results ?? data.response?.docs ?? [];
+          const results = data.results ?? [];
           if (results.length === 0) {
             hasMore = false;
             break;
@@ -64,7 +66,7 @@ export class FaolexScraper extends BaseScraper {
             if (text) allTexts.push(text);
           }
 
-          hasMore = data.hasMoreResults ?? results.length >= this.PAGE_SIZE;
+          hasMore = data.hasMoreResults ?? false;
           start += this.PAGE_SIZE;
         } catch (error) {
           this.log('warn', `FAOLEX API error for ${iso3} at offset ${start}: ${(error as Error).message}`);
@@ -82,24 +84,35 @@ export class FaolexScraper extends BaseScraper {
 
   private buildQuery(iso3: string, start: number): Record<string, any> {
     return {
-      query: `country:(${iso3}) AND language:(FRA) AND repealed:(N)`,
+      query: `country:(${iso3})`,
+      requestOptions: {
+        searchApplicationId: 'searchapplications/1be285f8874b8c6bfaabf84aa9d0c1be',
+      },
+      facetOptions: [],
       start,
-      rows: this.PAGE_SIZE,
-      sortField: 'dateOfText',
-      sortOrder: 'DESCENDING',
     };
   }
 
   private parseResult(doc: any, iso2: string): ScrapedText | null {
-    const title = doc.titleOfText ?? doc.title;
+    // Extract metadata fields into a map
+    const fields: Record<string, string> = {};
+    if (doc.metadata?.fields) {
+      for (const f of doc.metadata.fields) {
+        if (f.textValues?.values?.[0]) {
+          fields[f.name] = f.textValues.values[0];
+        }
+      }
+    }
+
+    const title = fields.titleOfText ?? doc.title;
     if (!title) return null;
 
-    const faolexId = doc.faolexId ?? doc.id;
+    const faolexId = fields.faolexId;
     const sourceUrl = faolexId
       ? `https://www.fao.org/faolex/results/details/en/c/${faolexId}`
       : undefined;
 
-    const dateStr = doc.dateOfText ?? doc.year;
+    const dateStr = fields.dateOfText;
     let promulgationDate: string | undefined;
     if (dateStr) {
       const parsed = new Date(dateStr);
@@ -108,10 +121,9 @@ export class FaolexScraper extends BaseScraper {
       }
     }
 
-    const typeStr = doc.typeOfText ?? '';
+    const typeStr = fields.typeOfTextCode ?? '';
     const textType = this.mapTextType(typeStr);
-
-    const abstract = doc.abstract ?? doc.abstractEn ?? '';
+    const abstract = fields.abstract ?? '';
 
     return {
       title,

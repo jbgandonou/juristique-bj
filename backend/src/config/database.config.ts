@@ -8,7 +8,7 @@ export default registerAs('database', () => {
       type: 'postgres' as const,
       url: databaseUrl,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: process.env.DB_SYNCHRONIZE === 'true',
       ssl: { rejectUnauthorized: false },
       logging: process.env.NODE_ENV !== 'production',
     };

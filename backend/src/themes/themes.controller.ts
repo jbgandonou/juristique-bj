@@ -19,8 +19,7 @@ export class ThemesController {
   @ApiOperation({ summary: 'Delete all themes' })
   async purgeAll() {
     const count = await this.service.repo.count();
-    await this.service.repo.query('DELETE FROM text_themes');
-    await this.service.repo.query('DELETE FROM themes');
+    await this.service.repo.query('TRUNCATE TABLE text_themes, themes CASCADE');
     return { deleted: count };
   }
 

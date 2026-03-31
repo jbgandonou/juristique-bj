@@ -19,7 +19,7 @@ export class CountriesController {
   @ApiOperation({ summary: 'Delete all countries' })
   async purgeAll() {
     const count = await this.service.repo.count();
-    await this.service.repo.query('DELETE FROM countries');
+    await this.service.repo.query('TRUNCATE TABLE countries CASCADE');
     return { deleted: count };
   }
 

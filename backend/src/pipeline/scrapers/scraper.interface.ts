@@ -1,15 +1,37 @@
 import { TextType } from '../../legal-texts/entities/legal-text.entity';
 
+export enum AlertType {
+  SCRAPE_FAILED = 'scrape_failed',
+  STRUCTURE_CHANGED = 'structure_changed',
+  NO_RESULTS = 'no_results',
+  VALIDATION_ERROR = 'validation_error',
+}
+
+export enum AlertSeverity {
+  INFO = 'info',
+  WARNING = 'warning',
+  ERROR = 'error',
+}
+
+export interface ScraperAlert {
+  type: AlertType;
+  severity: AlertSeverity;
+  message: string;
+  metadata?: Record<string, any>;
+}
+
 export interface ScrapedText {
   title: string;
   textType: TextType;
   countryCodes: string[];
   contentText?: string;
+  contentHtml?: string;
   summary?: string;
   reference?: string;
   promulgationDate?: string;
   sourceUrl?: string;
   sourceName: string;
+  language?: string;
 }
 
 export interface Scraper {

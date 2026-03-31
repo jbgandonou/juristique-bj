@@ -121,7 +121,7 @@
         <Column header="Actions" style="min-width: 140px;">
           <template #body="{ data }">
             <div class="row-actions">
-              <button class="action-btn view" title="Voir le document">
+              <button class="action-btn view" title="Voir le document" @click="navigateTo(`/textes/${data.id}`)">
                 <Eye :size="15" />
               </button>
               <button

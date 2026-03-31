@@ -90,8 +90,24 @@ export class ConstitutionsScraper extends BaseScraper {
   private async scrapeConstitution(source: ConstitutionSource): Promise<ScrapedText | null> {
     for (const url of source.urls) {
       try {
-        const html = await this.fetchPage(url);
-        const $ = cheerio.load(html);
+        const html = await this.fetchPage(url, {
+          responseType: 'arraybuffer',
+        });
+        // Handle ISO-8859-1 encoding (common on MJP)
+        let htmlStr: string;
+        if (Buffer.isBuffer(html) || html instanceof ArrayBuffer) {
+          const buf = Buffer.isBuffer(html) ? html : Buffer.from(html);
+          // Check if page declares ISO-8859-1
+          const rawStr = buf.toString('latin1');
+          if (rawStr.toLowerCase().includes('iso-8859-1') || rawStr.toLowerCase().includes('latin1')) {
+            htmlStr = buf.toString('latin1');
+          } else {
+            htmlStr = buf.toString('utf-8');
+          }
+        } else {
+          htmlStr = html as unknown as string;
+        }
+        const $ = cheerio.load(htmlStr);
 
         let content = '';
         for (const selector of source.selectors) {
@@ -107,12 +123,16 @@ export class ConstitutionsScraper extends BaseScraper {
           continue;
         }
 
-        // Detect if content is in French
-        const frenchWords = ['article', 'titre', 'chapitre', 'république', 'constitution', 'peuple', 'préambule'];
-        const lowerContent = content.substring(0, 2000).toLowerCase();
+        // Detect if content is in French (include accent-free variants for ISO-8859 pages)
+        const frenchWords = [
+          'article', 'titre', 'chapitre', 'constitution', 'peuple',
+          'republique', 'république', 'préambule', 'preambule',
+          'nationale', 'souverain', 'citoyen', 'democratique',
+        ];
+        const lowerContent = content.substring(0, 3000).toLowerCase();
         const frenchScore = frenchWords.filter((w) => lowerContent.includes(w)).length;
 
-        if (frenchScore < 2) {
+        if (frenchScore < 1) {
           this.log('warn', `Constitution from ${url} may not be in French (score: ${frenchScore})`);
           this.addAlert({
             type: AlertType.VALIDATION_ERROR,

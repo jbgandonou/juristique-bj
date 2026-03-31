@@ -1,114 +1,135 @@
-import { Injectable, Logger } from '@nestjs/common';
-import axios from 'axios';
+import { Injectable } from '@nestjs/common';
 import * as cheerio from 'cheerio';
-import { Scraper, ScrapedText } from './scraper.interface';
+import { BaseScraper } from './base.scraper';
+import { ScrapedText, AlertType, AlertSeverity } from './scraper.interface';
 import { TextType } from '../../legal-texts/entities/legal-text.entity';
 
-const BASE_URL = 'https://www.ohada.org';
-const ACTES_URL = `${BASE_URL}/actes-uniformes/`;
-
-// Known Actes Uniformes URLs (the site only links a few, but these all exist)
-const KNOWN_ACTES: { title: string; url: string }[] = [
-  { title: 'Acte Uniforme relatif au Droit Commercial Général', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-commercial-general/` },
-  { title: 'Acte Uniforme relatif au Droit des Sociétés Commerciales et du GIE', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-des-societes-commerciales-et-du-gie/` },
-  { title: 'Acte Uniforme portant organisation des Sûretés', url: `${BASE_URL}/acte-uniforme-portant-organisation-des-suretes/` },
-  { title: 'Acte Uniforme portant organisation des Procédures Simplifiées de Recouvrement et des Voies d\'Exécution', url: `${BASE_URL}/acte-uniforme-portant-organisation-des-procedures-simplifiees-de-recouvrement-et-des-voies-dexecution/` },
-  { title: 'Acte Uniforme portant organisation des Procédures Collectives d\'Apurement du Passif', url: `${BASE_URL}/acte-uniforme-portant-organisation-des-procedures-collectives-dapurement-du-passif/` },
-  { title: 'Acte Uniforme relatif au Droit de l\'Arbitrage', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-de-larbitrage/` },
-  { title: 'Acte Uniforme relatif au Droit Comptable et à l\'Information Financière', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-comptable-et-a-linformation-financiere-audcif/` },
-  { title: 'Acte Uniforme relatif au contrat de Transport de Marchandises par Route', url: `${BASE_URL}/acte-uniforme-relatif-au-contrat-de-transport-de-marchandises-par-route/` },
-  { title: 'Acte Uniforme relatif au Droit des Sociétés Coopératives', url: `${BASE_URL}/acte-uniforme-relatif-au-droit-des-societes-cooperatives/` },
-  { title: 'Acte Uniforme relatif à la Médiation', url: `${BASE_URL}/acte-uniforme-relatif-a-la-mediation/` },
-];
-
-// 17 OHADA member state codes
-const OHADA_MEMBERS = [
-  'BJ', 'BF', 'CM', 'CF', 'TD', 'KM', 'CG', 'CD',
-  'CI', 'GQ', 'GA', 'GN', 'ML', 'NE', 'SN', 'TG',
-];
-
 @Injectable()
-export class OhadaScraper implements Scraper {
+export class OhadaScraper extends BaseScraper {
   name = 'OHADA';
-  private readonly logger = new Logger(OhadaScraper.name);
 
-  async scrape(): Promise<ScrapedText[]> {
-    const results: ScrapedText[] = [];
+  private readonly BASE_URL = 'https://www.ohada.org';
+  private readonly DELAY_MS = 2000;
 
-    try {
-      this.logger.log('Fetching OHADA Actes Uniformes listing...');
-      const { data: html } = await axios.get(ACTES_URL, { timeout: 30000 });
-      const $ = cheerio.load(html);
+  private readonly OHADA_MEMBERS = [
+    'BJ', 'BF', 'CM', 'CF', 'TD', 'KM', 'CG', 'CD',
+    'CI', 'GQ', 'GA', 'GN', 'GW', 'ML', 'NE', 'SN', 'TG',
+  ];
 
-      // Start with known actes, then add any discovered from the page
-      const links: { title: string; url: string }[] = [...KNOWN_ACTES];
+  private readonly FRENCH_MONTHS: Record<string, string> = {
+    janvier: '01', février: '02', mars: '03', avril: '04',
+    mai: '05', juin: '06', juillet: '07', août: '08',
+    septembre: '09', octobre: '10', novembre: '11', décembre: '12',
+  };
 
-      $('a').each((_, el) => {
-        const href = $(el).attr('href') || '';
-        const text = $(el).text().trim();
-        if (
-          text.length > 10 &&
-          href.includes('acte-uniforme') &&
-          !href.endsWith('/actes-uniformes/')
-        ) {
-          const url = href.startsWith('http') ? href : `${BASE_URL}${href}`;
-          if (!links.find((l) => l.url === url)) {
-            links.push({ title: text, url });
-          }
-        }
-      });
+  private readonly SECTIONS = [
+    { path: '/actes-uniformes/', type: TextType.ACTE_UNIFORME, label: 'Actes Uniformes' },
+    { path: '/reglements/', type: TextType.LOI, label: 'Règlements' },
+    { path: '/decisions/', type: TextType.LOI, label: 'Décisions' },
+  ];
 
-      this.logger.log(`Total ${links.length} Actes Uniformes to scrape`);
+  async collect(): Promise<ScrapedText[]> {
+    const allTexts: ScrapedText[] = [];
 
-      for (const link of links) {
-        try {
-          await this.delay(2000);
-
-          this.logger.log(`Scraping: ${link.title}`);
-          const { data: pageHtml } = await axios.get(link.url, { timeout: 30000 });
-          const page$ = cheerio.load(pageHtml);
-
-          // Extract main content
-          const contentEl = page$('.entry-content, .elementor-widget-container, article, .post-content').first();
-          const contentText = contentEl.length
-            ? contentEl.text().replace(/\s+/g, ' ').trim()
-            : page$('body').text().replace(/\s+/g, ' ').trim().substring(0, 50000);
-
-          // Try to extract date from title or content
-          const dateMatch = link.title.match(/(\d{1,2})\s*(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s*(\d{4})/i);
-          let promulgationDate: string | undefined;
-          if (dateMatch) {
-            const months: Record<string, string> = {
-              janvier: '01', février: '02', mars: '03', avril: '04',
-              mai: '05', juin: '06', juillet: '07', août: '08',
-              septembre: '09', octobre: '10', novembre: '11', décembre: '12',
-            };
-            const month = months[dateMatch[2].toLowerCase()] || '01';
-            promulgationDate = `${dateMatch[3]}-${month}-${dateMatch[1].padStart(2, '0')}`;
-          }
-
-          results.push({
-            title: link.title.substring(0, 500),
-            textType: TextType.ACTE_UNIFORME,
-            countryCodes: [...OHADA_MEMBERS],
-            contentText: contentText.substring(0, 100000),
-            sourceUrl: link.url,
-            sourceName: this.name,
-            promulgationDate,
-          });
-        } catch (err) {
-          this.logger.warn(`Failed to scrape ${link.url}: ${err.message}`);
-        }
+    for (const section of this.SECTIONS) {
+      this.log('info', `Scraping OHADA ${section.label}...`);
+      try {
+        const texts = await this.scrapeSection(section.path, section.type);
+        allTexts.push(...texts);
+        this.log('info', `OHADA ${section.label}: ${texts.length} texts found`);
+      } catch (error) {
+        this.addAlert({
+          type: AlertType.SCRAPE_FAILED,
+          severity: AlertSeverity.ERROR,
+          message: `Failed to scrape OHADA ${section.label}: ${(error as Error).message}`,
+          metadata: { section: section.path },
+        });
       }
-    } catch (err) {
-      this.logger.error(`Failed to fetch OHADA listing: ${err.message}`);
+      await this.sleep(this.DELAY_MS);
     }
 
-    this.logger.log(`Scraped ${results.length} OHADA texts`);
-    return results;
+    return allTexts;
   }
 
-  private delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private async scrapeSection(path: string, textType: TextType): Promise<ScrapedText[]> {
+    const url = `${this.BASE_URL}${path}`;
+    const html = await this.fetchPage(url);
+    const $ = cheerio.load(html);
+
+    const links: { title: string; url: string }[] = [];
+
+    $('a[href]').each((_, el) => {
+      const href = $(el).attr('href') ?? '';
+      const text = $(el).text().trim();
+      if (
+        text.length > 20 &&
+        (href.includes('acte-uniforme') ||
+          href.includes('reglement') ||
+          href.includes('decision') ||
+          href.includes(this.BASE_URL))
+      ) {
+        const fullUrl = href.startsWith('http') ? href : `${this.BASE_URL}${href}`;
+        if (!links.some((l) => l.url === fullUrl)) {
+          links.push({ title: text, url: fullUrl });
+        }
+      }
+    });
+
+    if (links.length === 0) {
+      this.addAlert({
+        type: AlertType.STRUCTURE_CHANGED,
+        severity: AlertSeverity.WARNING,
+        message: `No links found on OHADA page: ${url}. HTML structure may have changed.`,
+        metadata: { url, htmlLength: html.length },
+      });
+      return [];
+    }
+
+    const texts: ScrapedText[] = [];
+
+    for (const link of links) {
+      try {
+        const detailHtml = await this.fetchPage(link.url);
+        const detail$ = cheerio.load(detailHtml);
+
+        const content = detail$('.entry-content, .elementor-widget-container, article, .post-content')
+          .first()
+          .text()
+          .trim();
+
+        const dateStr = this.parseFrenchDate(link.title) ?? this.parseFrenchDate(content.substring(0, 500));
+
+        texts.push({
+          title: link.title,
+          textType,
+          countryCodes: [...this.OHADA_MEMBERS],
+          contentText: content.substring(0, 100000),
+          contentHtml: detail$('.entry-content, article').first().html() ?? undefined,
+          sourceUrl: link.url,
+          sourceName: 'OHADA',
+          promulgationDate: dateStr,
+          language: 'fr',
+        });
+      } catch (error) {
+        this.log('warn', `Failed to fetch OHADA detail: ${link.url} — ${(error as Error).message}`);
+      }
+
+      await this.sleep(this.DELAY_MS);
+    }
+
+    return texts;
+  }
+
+  private parseFrenchDate(text: string): string | undefined {
+    const regex = /(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})/i;
+    const match = text.match(regex);
+    if (!match) return undefined;
+
+    const day = match[1].padStart(2, '0');
+    const month = this.FRENCH_MONTHS[match[2].toLowerCase()];
+    const year = match[3];
+    if (!month) return undefined;
+
+    return `${year}-${month}-${day}`;
   }
 }

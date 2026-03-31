@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { CountriesService } from './countries.service';
 import { CreateCountryDto } from './dto/create-country.dto';
@@ -13,6 +13,14 @@ export class CountriesController {
   @ApiOperation({ summary: 'Create a country' })
   create(@Body() dto: CreateCountryDto) {
     return this.service.create(dto);
+  }
+
+  @Delete('admin/purge-all')
+  @ApiOperation({ summary: 'Delete all countries' })
+  async purgeAll() {
+    const count = await this.service.repo.count();
+    await this.service.repo.query('DELETE FROM countries');
+    return { deleted: count };
   }
 
   @Get()

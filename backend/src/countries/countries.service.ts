@@ -9,7 +9,7 @@ import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
 export class CountriesService {
   constructor(
     @InjectRepository(Country)
-    private readonly repo: Repository<Country>,
+    public readonly repo: Repository<Country>,
   ) {}
 
   async create(dto: CreateCountryDto): Promise<Country> {

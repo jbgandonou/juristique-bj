@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { ThemesService } from './themes.service';
 import { CreateThemeDto } from './dto/create-theme.dto';
@@ -13,6 +13,15 @@ export class ThemesController {
   @ApiOperation({ summary: 'Create a theme' })
   create(@Body() dto: CreateThemeDto) {
     return this.service.create(dto);
+  }
+
+  @Delete('admin/purge-all')
+  @ApiOperation({ summary: 'Delete all themes' })
+  async purgeAll() {
+    const count = await this.service.repo.count();
+    await this.service.repo.query('DELETE FROM text_themes');
+    await this.service.repo.query('DELETE FROM themes');
+    return { deleted: count };
   }
 
   @Get()

@@ -9,7 +9,7 @@ import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
 export class ThemesService {
   constructor(
     @InjectRepository(Theme)
-    private readonly repo: Repository<Theme>,
+    public readonly repo: Repository<Theme>,
   ) {}
 
   async create(dto: CreateThemeDto): Promise<Theme> {

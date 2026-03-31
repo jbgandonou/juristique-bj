@@ -4,18 +4,21 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PipelineJob } from './entities/pipeline-job.entity';
 import { SourceConfig } from './entities/source-config.entity';
+import { PipelineAlert } from './entities/pipeline-alert.entity';
 import { LegalText } from '../legal-texts/entities/legal-text.entity';
 import { Country } from '../countries/entities/country.entity';
 import { PipelineService } from './pipeline.service';
 import { PipelineController } from './pipeline.controller';
 import { PipelineProcessor } from './pipeline.processor';
+import { PipelineAlertsService } from './pipeline-alerts.service';
+import { PipelineAlertsController } from './pipeline-alerts.controller';
 import { ConstituteScraper } from './scrapers/constitute.scraper';
 import { FaolexScraper } from './scrapers/faolex.scraper';
 import { OhadaScraper } from './scrapers/ohada.scraper';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PipelineJob, SourceConfig, LegalText, Country]),
+    TypeOrmModule.forFeature([PipelineJob, SourceConfig, LegalText, Country, PipelineAlert]),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -44,14 +47,15 @@ import { OhadaScraper } from './scrapers/ohada.scraper';
     }),
     BullModule.registerQueue({ name: 'pipeline' }),
   ],
-  controllers: [PipelineController],
+  controllers: [PipelineController, PipelineAlertsController],
   providers: [
     PipelineService,
     PipelineProcessor,
     ConstituteScraper,
     FaolexScraper,
     OhadaScraper,
+    PipelineAlertsService,
   ],
-  exports: [PipelineService],
+  exports: [PipelineService, PipelineAlertsService],
 })
 export class PipelineModule {}

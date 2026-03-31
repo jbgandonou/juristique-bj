@@ -151,6 +151,71 @@
       </DataTable>
     </div>
 
+    <!-- Alerts Section -->
+    <div class="alerts-card glass-card fade-in-up stagger-4">
+      <div class="card-header-block">
+        <h3 class="card-section-title">
+          Alertes Pipeline
+          <span v-if="alertCount > 0" class="alert-count-badge">{{ alertCount }}</span>
+        </h3>
+        <div class="alerts-filters">
+          <select v-model="alertFilter.type" class="alert-filter-select">
+            <option value="">Tous les types</option>
+            <option value="scrape_failed">Échec scraping</option>
+            <option value="structure_changed">Structure changée</option>
+            <option value="no_results">Aucun résultat</option>
+            <option value="validation_error">Erreur validation</option>
+          </select>
+          <select v-model="alertFilter.severity" class="alert-filter-select">
+            <option value="">Toutes sévérités</option>
+            <option value="error">Erreur</option>
+            <option value="warning">Warning</option>
+            <option value="info">Info</option>
+          </select>
+        </div>
+      </div>
+
+      <div v-if="alerts.length === 0" class="alerts-empty">
+        Aucune alerte
+      </div>
+
+      <div v-else class="alerts-list">
+        <div
+          v-for="alert in alerts"
+          :key="alert.id"
+          class="alert-row"
+          :class="{
+            'alert-error': alert.severity === 'error',
+            'alert-warning': alert.severity === 'warning',
+            'alert-info': alert.severity === 'info',
+            'alert-acknowledged': alert.acknowledged,
+          }"
+        >
+          <div class="alert-body">
+            <div class="alert-meta">
+              <span class="alert-type-chip"
+                :class="{
+                  'chip-error': alert.severity === 'error',
+                  'chip-warning': alert.severity === 'warning',
+                  'chip-info': alert.severity === 'info',
+                }">
+                {{ alert.type }}
+              </span>
+              <span class="alert-date">{{ formatAlertDate(alert.createdAt) }}</span>
+            </div>
+            <p class="alert-message">{{ alert.message }}</p>
+          </div>
+          <button
+            v-if="!alert.acknowledged"
+            class="alert-ack-btn"
+            @click="acknowledgeAlert(alert.id)"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Job Detail Dialog -->
     <Dialog
       v-model:visible="showJobDetail"
@@ -191,7 +256,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import {
   Globe, Clock, CheckCircle, CalendarClock, RefreshCw, Settings,
   Play, Loader, AlertTriangle, CircleCheck, Circle, Zap, Terminal, StopCircle,
@@ -202,7 +267,14 @@ import Dialog from 'primevue/dialog';
 
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
-const { getPipelineJobs, getPipelineSources, createPipelineJob } = useApi();
+const {
+  getPipelineJobs,
+  getPipelineSources,
+  createPipelineJob,
+  getPipelineAlerts,
+  getPipelineAlertCount,
+  acknowledgePipelineAlert,
+} = useApi();
 
 const loading = ref(true);
 const showJobDetail = ref(false);
@@ -212,11 +284,56 @@ const selectedJob = ref<any>(null);
 const defaultSources = [
   { name: 'FAOLEX', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
   { name: 'OHADA', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
-  { name: 'Constitute Project', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
+  { name: 'Constitutions', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
+  { name: 'CCJA', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
+  { name: 'Assemblées nationales', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
+  { name: 'Journaux officiels', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
 ];
 
 const sources = ref<any[]>([...defaultSources]);
 const jobs = ref<any[]>([]);
+
+// Alert state
+const alerts = ref<any[]>([]);
+const alertCount = ref(0);
+const alertFilter = ref({ type: '', severity: '' });
+
+const fetchAlerts = async () => {
+  try {
+    const params: Record<string, string> = { limit: '50' };
+    if (alertFilter.value.type) params.type = alertFilter.value.type;
+    if (alertFilter.value.severity) params.severity = alertFilter.value.severity;
+    const data = await getPipelineAlerts(params);
+    alerts.value = data?.data ?? data ?? [];
+  } catch (e) {
+    console.error('Failed to fetch alerts', e);
+  }
+};
+
+const fetchAlertCount = async () => {
+  try {
+    const data = await getPipelineAlertCount();
+    alertCount.value = typeof data === 'number' ? data : data?.count ?? 0;
+  } catch (e) {
+    console.error('Failed to fetch alert count', e);
+  }
+};
+
+const acknowledgeAlert = async (id: string) => {
+  try {
+    await acknowledgePipelineAlert(id);
+    await fetchAlerts();
+    await fetchAlertCount();
+  } catch (e) {
+    console.error('Failed to acknowledge alert', e);
+  }
+};
+
+const formatAlertDate = (date: string) => {
+  return new Date(date).toLocaleString('fr-FR');
+};
+
+watch(alertFilter, fetchAlerts, { deep: true });
 
 onMounted(async () => {
   try {
@@ -258,6 +375,9 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+
+  // Fetch alerts independently so a failure doesn't block the rest
+  await Promise.all([fetchAlerts(), fetchAlertCount()]);
 });
 
 const jobSummary = computed(() => {
@@ -731,6 +851,158 @@ const retryJob = async (job: any) => {
   max-height: 200px;
   overflow-y: auto;
   margin: 0;
+}
+
+/* Alerts Card */
+.alerts-card {
+  padding: 20px;
+}
+
+.alert-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  background: var(--juris-danger);
+  color: white;
+  font-size: var(--font-xs);
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  padding: 0 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.alerts-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.alert-filter-select {
+  border: 1px solid var(--juris-border);
+  border-radius: var(--radius-md);
+  padding: 5px 10px;
+  font-size: var(--font-xs);
+  background: var(--juris-surface);
+  color: var(--juris-text);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.alert-filter-select:focus {
+  border-color: var(--juris-primary-lighter);
+}
+
+.alerts-empty {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--juris-text-muted);
+  font-size: var(--font-sm);
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alert-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  transition: opacity 0.2s ease;
+}
+
+.alert-error {
+  border-color: rgba(198, 40, 40, 0.25);
+  background: rgba(198, 40, 40, 0.04);
+}
+
+.alert-warning {
+  border-color: rgba(249, 168, 37, 0.3);
+  background: rgba(249, 168, 37, 0.04);
+}
+
+.alert-info {
+  border-color: rgba(21, 101, 192, 0.2);
+  background: rgba(21, 101, 192, 0.04);
+}
+
+.alert-acknowledged {
+  opacity: 0.45;
+}
+
+.alert-body {
+  flex: 1;
+}
+
+.alert-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.alert-type-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.chip-error {
+  background: rgba(198, 40, 40, 0.12);
+  color: var(--juris-danger);
+}
+
+.chip-warning {
+  background: rgba(249, 168, 37, 0.15);
+  color: var(--juris-warning);
+}
+
+.chip-info {
+  background: rgba(21, 101, 192, 0.1);
+  color: var(--juris-info);
+}
+
+.alert-date {
+  font-size: var(--font-xs);
+  color: var(--juris-text-muted);
+}
+
+.alert-message {
+  font-size: var(--font-sm);
+  color: var(--juris-text);
+  margin: 0;
+}
+
+.alert-ack-btn {
+  margin-left: 12px;
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--juris-border);
+  border-radius: var(--radius-md);
+  background: var(--juris-surface);
+  color: var(--juris-text-secondary);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.alert-ack-btn:hover {
+  background: var(--juris-primary-50);
+  color: var(--juris-primary);
+  border-color: var(--juris-primary-lighter);
 }
 
 /* Responsive */

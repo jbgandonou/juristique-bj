@@ -113,6 +113,18 @@ export const useApi = () => {
   const getPipelineSources = () =>
     apiFetch<any[]>('/pipeline/sources');
 
+  // Pipeline alerts
+  const getPipelineAlerts = (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+    return apiFetch<any>(`/pipeline/alerts${qs}`);
+  };
+
+  const getPipelineAlertCount = () =>
+    apiFetch<any>('/pipeline/alerts/count');
+
+  const acknowledgePipelineAlert = (id: string) =>
+    apiFetch<any>(`/pipeline/alerts/${id}/acknowledge`, { method: 'PATCH' });
+
   // Legal texts with status filter (for editorial queue)
   const getLegalTextsByStatus = (status: string, page = 1, limit = 20) =>
     apiFetch<PaginatedResult<LegalText>>(`/legal-texts?status=${status}&page=${page}&limit=${limit}`);
@@ -268,6 +280,9 @@ export const useApi = () => {
     getPipelineJobs,
     createPipelineJob,
     getPipelineSources,
+    getPipelineAlerts,
+    getPipelineAlertCount,
+    acknowledgePipelineAlert,
     getLegalTextsByStatus,
     updateLegalTextStatus,
     compareLegalTexts,

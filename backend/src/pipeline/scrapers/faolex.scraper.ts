@@ -94,12 +94,15 @@ export class FaolexScraper extends BaseScraper {
   }
 
   private parseResult(doc: any, iso2: string): ScrapedText | null {
-    // Extract metadata fields into a map
+    // Extract metadata fields into maps (single value + all values)
     const fields: Record<string, string> = {};
+    const fieldArrays: Record<string, string[]> = {};
     if (doc.metadata?.fields) {
       for (const f of doc.metadata.fields) {
-        if (f.textValues?.values?.[0]) {
-          fields[f.name] = f.textValues.values[0];
+        const values = f.textValues?.values ?? [];
+        if (values.length > 0) {
+          fields[f.name] = values[0];
+          fieldArrays[f.name] = values;
         }
       }
     }
@@ -108,8 +111,16 @@ export class FaolexScraper extends BaseScraper {
     if (!title) return null;
 
     const faolexId = fields.faolexId;
+
+    // Source URL: FAOLEX detail page
     const sourceUrl = faolexId
       ? `https://www.fao.org/faolex/results/details/en/c/${faolexId}`
+      : undefined;
+
+    // PDF link: try linksToFullText first, then alternativeLinks
+    const pdfFilename = fields.linksToFullText ?? fields.alternativeLinks;
+    const pdfUrl = pdfFilename
+      ? `https://faolex.fao.org/docs/pdf/${pdfFilename}`
       : undefined;
 
     const dateStr = fields.dateOfText;
@@ -122,17 +133,25 @@ export class FaolexScraper extends BaseScraper {
     }
 
     const typeStr = fields.typeOfTextCode ?? '';
-    // Detect type from French title first
     const textType = this.detectTextTypeFromTitle(title) ?? this.mapTextType(typeStr);
     const abstract = fields.abstract ?? '';
+
+    // Build content: abstract from FAOLEX (this is real data from FAO, not generated)
+    // Include PDF link so users can access the full official document
+    let contentText = abstract;
+    if (pdfUrl) {
+      contentText = contentText
+        ? `${contentText}\n\n📄 Document PDF officiel : ${pdfUrl}`
+        : `📄 Document PDF officiel : ${pdfUrl}`;
+    }
 
     return {
       title,
       textType,
       countryCodes: [iso2],
-      contentText: abstract,
-      summary: abstract.length > 500 ? abstract.substring(0, 500) + '...' : abstract,
-      sourceUrl,
+      contentText,
+      summary: abstract || undefined,
+      sourceUrl: pdfUrl ?? sourceUrl,
       sourceName: 'FAOLEX',
       promulgationDate,
       language: 'fr',

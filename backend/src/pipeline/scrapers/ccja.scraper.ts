@@ -8,7 +8,7 @@ import { TextType } from '../../legal-texts/entities/legal-text.entity';
 export class CcjaScraper extends BaseScraper {
   name = 'CCJA';
 
-  private readonly BASE_URL = 'https://www.ccja.org';
+  private readonly BASE_URL = 'https://www.ohada.org';
   private readonly DELAY_MS = 2000;
 
   private readonly OHADA_MEMBERS = [
@@ -28,9 +28,8 @@ export class CcjaScraper extends BaseScraper {
     this.log('info', 'Scraping CCJA decisions...');
 
     const listUrls = [
-      `${this.BASE_URL}/jurisprudence`,
-      `${this.BASE_URL}/decisions`,
-      `${this.BASE_URL}/arrets`,
+      `${this.BASE_URL}/jurisprudence-ohada/`,
+      `${this.BASE_URL}/recueil-de-jurisprudence-n36/`,
     ];
 
     let listHtml: string | null = null;
@@ -65,7 +64,9 @@ export class CcjaScraper extends BaseScraper {
       const text = $(el).text().trim();
       if (
         text.length > 15 &&
-        (href.includes('arret') ||
+        (href.includes('jurisprudence') ||
+          href.includes('arret') ||
+          href.includes('recueil') ||
           href.includes('decision') ||
           href.includes('avis') ||
           text.toLowerCase().includes('arrêt') ||

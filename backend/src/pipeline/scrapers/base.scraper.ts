@@ -43,7 +43,7 @@ export abstract class BaseScraper implements Scraper {
   }
 
   validate(doc: ScrapedText): boolean {
-    if (!doc.title || doc.title.trim().length < 6) {
+    if (!doc.title || doc.title.trim().length < 10) {
       this.log('debug', `Rejected: title too short — "${doc.title}"`);
       return false;
     }

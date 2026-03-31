@@ -13,7 +13,7 @@ class TestScraper extends BaseScraper {
   async collect(): Promise<ScrapedText[]> {
     return [
       {
-        title: 'Test Law',
+        title: 'Loi relative au droit commercial',
         textType: TextType.LOI,
         countryCodes: ['BJ'],
         contentText: 'This is a valid legal text with enough content to pass validation checks.',
@@ -55,7 +55,7 @@ describe('BaseScraper', () => {
     it('should return scraped texts from collect()', async () => {
       const results = await scraper.scrape();
       expect(results.length).toBe(1);
-      expect(results[0].title).toBe('Test Law');
+      expect(results[0].title).toBe('Loi relative au droit commercial');
     });
 
     it('should filter out texts with empty titles', async () => {
@@ -90,7 +90,7 @@ describe('BaseScraper', () => {
       spy.mockRestore();
     });
 
-    it('should filter out texts with short titles (< 6 chars)', async () => {
+    it('should filter out texts with short titles (< 10 chars)', async () => {
       const spy = jest.spyOn(scraper, 'collect').mockResolvedValue([
         {
           title: 'Short',

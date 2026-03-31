@@ -6,9 +6,12 @@ import { Job } from 'bullmq';
 import { PipelineJob, JobStatus } from './entities/pipeline-job.entity';
 import { LegalText, TextStatus } from '../legal-texts/entities/legal-text.entity';
 import { Country } from '../countries/entities/country.entity';
-import { ConstituteScraper } from './scrapers/constitute.scraper';
 import { FaolexScraper } from './scrapers/faolex.scraper';
 import { OhadaScraper } from './scrapers/ohada.scraper';
+import { ConstitutionsScraper } from './scrapers/constitutions.scraper';
+import { CcjaScraper } from './scrapers/ccja.scraper';
+import { AssembleesScraper } from './scrapers/assemblees.scraper';
+import { JournauxScraper } from './scrapers/journaux.scraper';
 import { ScrapedText } from './scrapers/scraper.interface';
 import { BaseScraper } from './scrapers/base.scraper';
 import { PipelineAlertsService } from './pipeline-alerts.service';
@@ -24,9 +27,12 @@ export class PipelineProcessor extends WorkerHost {
     private readonly textRepo: Repository<LegalText>,
     @InjectRepository(Country)
     private readonly countryRepo: Repository<Country>,
-    private readonly constituteScraper: ConstituteScraper,
     private readonly faolexScraper: FaolexScraper,
     private readonly ohadaScraper: OhadaScraper,
+    private readonly constitutionsScraper: ConstitutionsScraper,
+    private readonly ccjaScraper: CcjaScraper,
+    private readonly assembleesScraper: AssembleesScraper,
+    private readonly journauxScraper: JournauxScraper,
     private readonly alertsService: PipelineAlertsService,
   ) {
     super();
@@ -79,12 +85,18 @@ export class PipelineProcessor extends WorkerHost {
 
   private getScraper(sourceName: string): BaseScraper {
     switch (sourceName) {
-      case 'Constitute Project':
-        return this.constituteScraper;
       case 'FAOLEX':
         return this.faolexScraper;
       case 'OHADA':
         return this.ohadaScraper;
+      case 'Constitutions':
+        return this.constitutionsScraper;
+      case 'CCJA':
+        return this.ccjaScraper;
+      case 'Assemblées nationales':
+        return this.assembleesScraper;
+      case 'Journaux officiels':
+        return this.journauxScraper;
       default:
         throw new Error(`Unknown source: ${sourceName}`);
     }

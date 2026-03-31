@@ -12,9 +12,12 @@ import { PipelineController } from './pipeline.controller';
 import { PipelineProcessor } from './pipeline.processor';
 import { PipelineAlertsService } from './pipeline-alerts.service';
 import { PipelineAlertsController } from './pipeline-alerts.controller';
-import { ConstituteScraper } from './scrapers/constitute.scraper';
 import { FaolexScraper } from './scrapers/faolex.scraper';
 import { OhadaScraper } from './scrapers/ohada.scraper';
+import { ConstitutionsScraper } from './scrapers/constitutions.scraper';
+import { CcjaScraper } from './scrapers/ccja.scraper';
+import { AssembleesScraper } from './scrapers/assemblees.scraper';
+import { JournauxScraper } from './scrapers/journaux.scraper';
 
 @Module({
   imports: [
@@ -50,11 +53,14 @@ import { OhadaScraper } from './scrapers/ohada.scraper';
   controllers: [PipelineController, PipelineAlertsController],
   providers: [
     PipelineService,
+    PipelineAlertsService,
     PipelineProcessor,
-    ConstituteScraper,
     FaolexScraper,
     OhadaScraper,
-    PipelineAlertsService,
+    ConstitutionsScraper,
+    CcjaScraper,
+    AssembleesScraper,
+    JournauxScraper,
   ],
   exports: [PipelineService, PipelineAlertsService],
 })

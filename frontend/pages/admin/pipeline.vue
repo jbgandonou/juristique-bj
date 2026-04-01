@@ -38,6 +38,17 @@
 
         <div class="source-name">{{ src.name }}</div>
 
+        <div v-if="SOURCE_META[src.name]" class="source-details">
+          <div class="source-sites">
+            <ExternalLink :size="11" />
+            <span>{{ SOURCE_META[src.name].sites.join(', ') }}</span>
+          </div>
+          <div class="source-countries">
+            <MapPin :size="11" />
+            <span>{{ SOURCE_META[src.name].countries.join(', ') }}</span>
+          </div>
+        </div>
+
         <div class="source-meta">
           <div class="source-meta-row">
             <Clock :size="13" />
@@ -283,6 +294,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import {
   Globe, Clock, CheckCircle, CalendarClock, RefreshCw, Settings,
   Play, Loader, AlertTriangle, CircleCheck, Circle, Zap, Terminal, StopCircle, Trash2,
+  ExternalLink, MapPin,
 } from 'lucide-vue-next';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -305,6 +317,18 @@ const loading = ref(true);
 const showJobDetail = ref(false);
 const selectedJob = ref<any>(null);
 
+// Source metadata: sites scraped, countries covered
+const SOURCE_META: Record<string, { sites: string[]; countries: string[] }> = {
+  'FAOLEX': { sites: ['faolex.fao.org'], countries: ['BJ', 'SN', 'CI', 'CM', 'BF', 'ML'] },
+  'OHADA': { sites: ['ohada.org'], countries: ['17 pays OHADA'] },
+  'Constitutions': { sites: ['mjp.univ-perp.fr', 'constituteproject.org'], countries: ['BJ', 'SN', 'CI', 'CM', 'BF', 'ML'] },
+  'CCJA': { sites: ['ohada.org/jurisprudence'], countries: ['17 pays OHADA'] },
+  'Assemblées nationales': { sites: ['assemblee-nationale.bj', 'assnat.ci', 'assemblee-nationale.cm', 'assemblee.bf', 'assemblee-nationale.ml'], countries: ['BJ', 'CI', 'CM', 'BF', 'ML'] },
+  'Journaux officiels': { sites: ['sgg.gouv.bj', 'jo.gouv.sn', 'jogouv.ci', 'sppm.cm', 'legiburkina.bf', 'sgg.gouv.ml'], countries: ['BJ', 'SN', 'CI', 'CM', 'BF', 'ML'] },
+  'Primature Sénégal': { sites: ['primature.sn'], countries: ['SN'] },
+  'Togo Documents officiels': { sites: ['republiquetogolaise.com'], countries: ['TG'] },
+};
+
 // Real sources configured in the pipeline
 const defaultSources = [
   { name: 'FAOLEX', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
@@ -313,6 +337,8 @@ const defaultSources = [
   { name: 'CCJA', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
   { name: 'Assemblées nationales', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
   { name: 'Journaux officiels', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
+  { name: 'Primature Sénégal', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
+  { name: 'Togo Documents officiels', active: true, lastRun: '—', successRate: '—', nextRun: '—' },
 ];
 
 const sources = ref<any[]>([...defaultSources]);
@@ -666,6 +692,31 @@ const retryJob = async (job: any) => {
   font-size: var(--font-base);
   font-weight: 700;
   color: var(--juris-text);
+}
+
+.source-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--juris-border, #e5e7eb);
+  margin-bottom: 2px;
+}
+
+.source-sites,
+.source-countries {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--juris-text-secondary);
+  line-height: 1.4;
+}
+
+.source-sites svg,
+.source-countries svg {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .source-meta {

@@ -27,18 +27,11 @@ export class AssembleesScraper extends BaseScraper {
       contentSelectors: ['.entry-content, .content, article, .post-content'],
     },
     {
-      countryCode: 'SN',
-      countryName: 'Sénégal',
-      baseUrl: 'https://www.assemblee-nationale.sn',
-      lawListPaths: ['/lois-votees', '/textes-de-loi', '/lois'],
-      contentSelectors: ['.entry-content, .content, article, .field-content'],
-    },
-    {
       countryCode: 'CI',
       countryName: "Côte d'Ivoire",
       baseUrl: 'https://www.assnat.ci',
-      lawListPaths: ['/lois-votees', '/les-lois', '/textes'],
-      contentSelectors: ['.entry-content, .content, article'],
+      lawListPaths: ['/?-lois-82-', '/lois-votees', '/les-lois'],
+      contentSelectors: ['.entry-content, .content, article, .spip_document'],
     },
     {
       countryCode: 'CM',

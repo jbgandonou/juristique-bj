@@ -12,6 +12,8 @@ import { ConstitutionsScraper } from './scrapers/constitutions.scraper';
 import { CcjaScraper } from './scrapers/ccja.scraper';
 import { AssembleesScraper } from './scrapers/assemblees.scraper';
 import { JournauxScraper } from './scrapers/journaux.scraper';
+import { PrimatureSnScraper } from './scrapers/primature-sn.scraper';
+import { TogoOfficielScraper } from './scrapers/togo-officiel.scraper';
 import { ScrapedText } from './scrapers/scraper.interface';
 import { BaseScraper } from './scrapers/base.scraper';
 import { PipelineAlertsService } from './pipeline-alerts.service';
@@ -33,6 +35,8 @@ export class PipelineProcessor extends WorkerHost {
     private readonly ccjaScraper: CcjaScraper,
     private readonly assembleesScraper: AssembleesScraper,
     private readonly journauxScraper: JournauxScraper,
+    private readonly primatureSnScraper: PrimatureSnScraper,
+    private readonly togoOfficielScraper: TogoOfficielScraper,
     private readonly alertsService: PipelineAlertsService,
   ) {
     super();
@@ -126,6 +130,10 @@ export class PipelineProcessor extends WorkerHost {
         return this.assembleesScraper;
       case 'Journaux officiels':
         return this.journauxScraper;
+      case 'Primature Sénégal':
+        return this.primatureSnScraper;
+      case 'Togo Documents officiels':
+        return this.togoOfficielScraper;
       default:
         throw new Error(`Unknown source: ${sourceName}`);
     }

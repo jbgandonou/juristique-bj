@@ -18,6 +18,8 @@ import { ConstitutionsScraper } from './scrapers/constitutions.scraper';
 import { CcjaScraper } from './scrapers/ccja.scraper';
 import { AssembleesScraper } from './scrapers/assemblees.scraper';
 import { JournauxScraper } from './scrapers/journaux.scraper';
+import { PrimatureSnScraper } from './scrapers/primature-sn.scraper';
+import { TogoOfficielScraper } from './scrapers/togo-officiel.scraper';
 
 @Module({
   imports: [
@@ -61,6 +63,8 @@ import { JournauxScraper } from './scrapers/journaux.scraper';
     CcjaScraper,
     AssembleesScraper,
     JournauxScraper,
+    PrimatureSnScraper,
+    TogoOfficielScraper,
   ],
   exports: [PipelineService, PipelineAlertsService],
 })

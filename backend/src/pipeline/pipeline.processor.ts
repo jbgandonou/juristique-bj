@@ -142,8 +142,15 @@ export class PipelineProcessor extends WorkerHost {
     const codeMap = new Map(countries.map((c) => [c.code, c]));
 
     let created = 0;
+    let skippedValidation = 0;
 
     for (const text of texts) {
+      // Content validation
+      if (!this.isValidForStorage(text)) {
+        skippedValidation++;
+        continue;
+      }
+
       for (const code of text.countryCodes) {
         const country = codeMap.get(code);
         if (!country) continue;
@@ -165,7 +172,7 @@ export class PipelineProcessor extends WorkerHost {
           contentText: text.contentText,
           summary: text.summary,
           reference: text.reference,
-          promulgationDate: text.promulgationDate ? new Date(text.promulgationDate) : undefined,
+          promulgationDate: this.parseDate(text.promulgationDate),
           sourceUrl: text.sourceUrl,
           sourceName: text.sourceName,
           status: TextStatus.PENDING_REVIEW,
@@ -176,6 +183,32 @@ export class PipelineProcessor extends WorkerHost {
       }
     }
 
+    if (skippedValidation > 0) {
+      this.logger.warn(`Skipped ${skippedValidation} texts failing content validation`);
+    }
+
     return created;
+  }
+
+  private isValidForStorage(text: ScrapedText): boolean {
+    // Title must be meaningful (already checked in scraper, double-check here)
+    if (!text.title || text.title.trim().length < 10) return false;
+
+    // If date is provided, it must be a plausible year
+    if (text.promulgationDate) {
+      const year = new Date(text.promulgationDate).getFullYear();
+      if (isNaN(year) || year < 1960 || year > new Date().getFullYear() + 1) return false;
+    }
+
+    return true;
+  }
+
+  private parseDate(dateStr?: string): Date | undefined {
+    if (!dateStr) return undefined;
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return undefined;
+    const year = date.getFullYear();
+    if (year < 1960 || year > new Date().getFullYear() + 1) return undefined;
+    return date;
   }
 }

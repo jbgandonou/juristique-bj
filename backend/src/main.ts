@@ -8,9 +8,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(helmet());
+
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (!frontendUrl || frontendUrl === '*') {
+    console.warn(
+      '⚠️  FRONTEND_URL is not set or is wildcard — CORS will be restrictive. Set FRONTEND_URL in production.',
+    );
+  }
   app.enableCors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: frontendUrl && frontendUrl !== '*' ? frontendUrl.split(',') : false,
   });
+
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const swaggerConfig = new DocumentBuilder()

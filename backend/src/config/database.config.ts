@@ -3,14 +3,23 @@ import { registerAs } from '@nestjs/config';
 export default registerAs('database', () => {
   const databaseUrl = process.env.DATABASE_URL;
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  const synchronize = isProduction ? false : process.env.DB_SYNCHRONIZE !== 'false';
+
+  if (isProduction && process.env.DB_SYNCHRONIZE === 'true') {
+    console.warn(
+      '⚠️  DB_SYNCHRONIZE=true is ignored in production. Use migrations instead.',
+    );
+  }
+
   if (databaseUrl) {
     return {
       type: 'postgres' as const,
       url: databaseUrl,
       autoLoadEntities: true,
-      synchronize: process.env.DB_SYNCHRONIZE === 'true',
+      synchronize,
       ssl: { rejectUnauthorized: false },
-      logging: process.env.NODE_ENV !== 'production',
+      logging: !isProduction,
     };
   }
 
@@ -22,6 +31,6 @@ export default registerAs('database', () => {
     password: process.env.POSTGRES_PASSWORD || 'juristique_dev',
     database: process.env.POSTGRES_DB || 'juristique',
     autoLoadEntities: true,
-    synchronize: process.env.NODE_ENV !== 'production',
+    synchronize,
   };
 });
